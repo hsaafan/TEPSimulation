@@ -1,0 +1,192 @@
+Streams:
+  # Reactor
+  A Feed:
+    Mole Fraction:
+      A: 0.99990
+      B: 0.00010
+      C: 0
+      D: 0
+      E: 0
+      F: 0
+      G: 0
+      H: 0
+      Water: 0
+    Temperature:
+      Value: 45
+      Units: C
+  D Feed:
+    Mole Fraction:
+      A: 0
+      B: 0.00010
+      C: 0
+      D: 0.99990
+      E: 0
+      F: 0
+      G: 0
+      H: 0
+      Water: 0
+    Temperature:
+      Value: 45
+      Units: C
+  E Feed:
+    Mole Fraction:
+      A: 0
+      B: 0
+      C: 0
+      D: 0
+      E: 0.99990
+      F: 0.00010
+      G: 0
+      H: 0
+      Water: 0
+    Temperature:
+      Value: 45
+      Units: C
+  Reactor Product:
+    Mole Fraction:
+      A: 0.27164
+      B: 0.11393
+      C: 0.19763
+      D: 0.01075
+      E: 0.17722
+      F: 0.02159
+      G: 0.12302
+      H: 0.08423
+      Water: 0
+    Temperature:
+      Value: 120.4
+      Units: C
+  Total Recycle: {}
+  Reactor Feed: {}
+  Reactor Jacket CW Inlet: {}
+  Reactor Jacket CW Outlet: {}
+  
+  # Separator
+  Separator Feed: {}
+  Separator Recycle: {}
+  Separator Underflow: {}
+  Separator Overhead: {}
+  
+  # Compressor
+  Purge: {}
+  Recycle: {}
+  Compressor Feed: {}
+  Compressor Outlet: {}
+  Compressor Bypass: {}
+  Condenser Jacket CW Inlet: {}
+  Condenser Jacket CW Outlet: {}
+  
+  # Stripper
+  C Feed:
+    Mole Fraction:
+      A: 0.48500
+      B: 0.00500
+      C: 0.51000
+      D: 0
+      E: 0
+      F: 0
+      G: 0
+      H: 0
+      Water: 0
+    Temperature:
+      Value: 45
+      Units: C
+  Stripper Overhead:
+    Mole Fraction:
+      A: 0.43263
+      B: 0.00444
+      C: 0.45264
+      D: 0.00116
+      E: 0.07256
+      F: 0.00885
+      G: 0.01964
+      H: 0.00808
+      Water: 0
+    Temperature:
+      Value: 65.7
+      Units: C
+  Stripper Underflow: {}
+  
+  # Stripper Reboiler
+  Reboiler Feed: {}
+  Reboiler Product: {}
+  Product: {}
+  Reboiler Steam: {}
+  Reboiler Condensate: {}
+
+Unit Operations:
+  Splits:
+    Bypass Valve:
+      Inlet: "Compressor Outlet"
+      Outlet: ["Compressor Bypass", "Recycle"]
+    Purge Valve:
+      Inlet: "Separator Overhead"
+      Outlet: ["Purge", "Separator Recycle"]
+    Product Valve:
+      Inlet: "Stripper Underflow"
+      Outlet: ["Product", "Reboiler Feed"]
+  Joins:
+    Recycle Mix:
+      Inlet: ["Recycle", "Stripper Overhead"]
+      Outlet: "Total Recycle"
+    Compressor Feed Mix:
+      Inlet: ["Separator Recycle", "Compressor Bypass"]
+      Outlet: "Compressor Feed"
+    Reactor Mix:
+      Inlet: ["A Feed", "D Feed", "E Feed", "Total Recycle"]
+      Outlet: "Reactor Feed"
+  Compressors:
+    COMP:
+      File: "units/Compressor.yaml"
+      Inlet: "Compressor Feed"
+      Outlet: "Compressor Outlet"
+  Heat Exchangers:
+    COND:
+      File: "units/Condenser.yaml"
+      Hot Inlet: "Reactor Product"
+      Hot Outlet: "Separator Feed"
+      Cold Inlet: "Condenser Jacket CW Inlet"
+      Cold Outlet: "Condenser Jacket CW Outlet"
+    REBOIL:
+      File: "units/Reboiler.yaml"
+      Hot Inlet: "Reboiler Steam"
+      Hot Outlet: "Reboiler Condensate"
+      Cold Inlet: "Reboiler Feed"
+      Cold Outlet: "Reboiler Product"
+  Reactors:
+    REAC:
+      File: "units/Reactor.yaml"
+      Inlet: ["A Feed", "D Feed", "E Feed", "Reactor Recycle"]
+      Outlet: "Reactor Product"
+      Jacket:
+        Inlet: "Reactor Jacket CW Inlet"
+        Outlet: "Reactor Jacket CW Outlet"
+  Separators:
+    SEP:
+      File: "units/Separator.yaml"
+      Inlet: "Separator Feed"
+      Outlet:
+        Vapor: "Separator Overhead"
+        Liquid: "Separator Underflow"
+  Strippers:
+    STRIP:
+      File: "units/Stripper.yaml"
+      Inlet: ["C Feed", "Separator Liquid", "Reboiler Product"]
+      Outlet:
+        Vapor: "Stripper Overhead"
+        Liquid: "Stripper Underflow"
+  
+Calculation Order:
+  - Reactor Mix
+  - REAC
+  - COND
+  - SEP
+  - Recycle Mix
+  - Bypass Valve
+  - Purge Valve
+  - Compressor Feed Mix
+  - COMP
+  - STRIP
+  - Recycle Mix
+  - REBOIL
+  - Product Valve

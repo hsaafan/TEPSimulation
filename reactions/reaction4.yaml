@@ -1,0 +1,15 @@
+Name: 3D Byproduct
+Components: [A, D, F]
+Stoichiometry: [0, -1.5, 1]
+Rate Order: [1, 1, 0]
+Phase: gas
+Enthalpy:
+  val: 0
+  units: cal / mol
+Arrhenius:
+  A:
+    val: 5.4411144e+25
+    units: mol / mmHg ** 2 / hour
+  Ea:
+    val: 60000
+    units: cal / mol

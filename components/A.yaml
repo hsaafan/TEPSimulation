@@ -1,0 +1,16 @@
+Name: A
+Antoines A: 0
+Antoines B: 0
+Antoines C: 0
+# Noncondensible
+Molar Mass: 2.0
+Liquid Density A: 1.0
+Liquid Density B: 0.0
+Liquid Density C: 0.0
+Liquid Specific Enthalpy A: 1.0
+Liquid Specific Enthalpy B: 0.0
+Liquid Specific Enthalpy C: 0.0
+Vaporization Heat: 1.0
+Gas Specific Enthalpy A: 3.441
+Gas Specific Enthalpy B: 7.18e-4
+Gas Specific Enthalpy C: 6.0e-7

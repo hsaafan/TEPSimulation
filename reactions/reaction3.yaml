@@ -1,0 +1,15 @@
+Name: AE Byproduct
+Components: [A, E, F]
+Stoichiometry: [-1, -1, 1]
+Rate Order: [1, 1, 0]
+Phase: gas
+Enthalpy:
+  val: 0
+  units: cal / mol
+Arrhenius:
+  A:
+    val: 7.0895077e+25
+    units: mol / mmHg ** 2 / hour
+  Ea:
+    val: 60000
+    units: cal / mol

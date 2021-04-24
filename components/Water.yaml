@@ -1,0 +1,16 @@
+Name: Water
+Antoines A: 
+Antoines B: 
+Antoines C: 
+# Temperature in C, Pressure in Pa, P=exp(A+B/(T+C))
+Molar Mass: 18.0
+Liquid Density A: 
+Liquid Density B: 
+Liquid Density C: 
+Liquid Specific Enthalpy A: 
+Liquid Specific Enthalpy B: 
+Liquid Specific Enthalpy C: 
+Vaporization Heat: 
+Gas Specific Enthalpy A: 
+Gas Specific Enthalpy B: 
+Gas Specific Enthalpy C: 

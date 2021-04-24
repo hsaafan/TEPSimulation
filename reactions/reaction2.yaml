@@ -1,0 +1,15 @@
+Name: H Product
+Components: [A, C, E, H]
+Stoichiometry: [-1, -1, -1, 1]
+Rate Order: [1.1544, 0.3735, 1, 0]
+Phase: gas
+Enthalpy:
+  val: 0.027796
+  units: cal / mol
+Arrhenius:
+  A:
+    val: 9119.02
+    units: mol / mmHg ** 2.5279 / hour
+  Ea:
+    val: 20000
+    units: cal / mol
