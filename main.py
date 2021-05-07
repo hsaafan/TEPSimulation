@@ -1,21 +1,17 @@
 """ Main Module """
 __author__ = "Hussein Saafan"
-from math import ceil
 
-import materials
-import flowsheet
+from mvc import Model, View, Controller
 
 
-def main(time: float, time_step: float, seed: int = None,
-         flowsheet_file: str = "flowsheet.yaml",
-         init_file: str = "init.yaml"):
-    MATS = materials.import_materials()
-    FS = flowsheet.FlowSheet(MATS, flowsheet_file)
-    FS.seed = seed
-    time = ceil(time * 3600 / time_step)
-    for h in range(time):
-        FS.step(h)
-        data = FS.output()
+def main(time: float, time_step: float, seed: int = None):
+    view = View()
+    model = Model()
+    controller = Controller()
+    controller.connect_model(model)
+    controller.connect_view(view)
+    model.set_seed(seed)
+    model.set_time(time, time_step)
     pass
 
 
