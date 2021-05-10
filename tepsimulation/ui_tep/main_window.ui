@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>Hussein Saafan</author>
+ <class>main_window</class>
+ <widget class="QMainWindow" name="main_window">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>675</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Tennessee Eastman Process Simulation</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="central_widget">
+   <layout class="QVBoxLayout" name="main_vertical_layout" stretch="2,0">
+    <item>
+     <layout class="QHBoxLayout" name="main_layout" stretch="3,4">
+      <item>
+       <widget class="QTabWidget" name="tab_layout">
+        <property name="tabPosition">
+         <enum>QTabWidget::North</enum>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <property name="movable">
+         <bool>false</bool>
+        </property>
+        <property name="tabBarAutoHide">
+         <bool>false</bool>
+        </property>
+        <widget class="QWidget" name="tab_components">
+         <attribute name="title">
+          <string>Components</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QComboBox" name="select_components"/>
+          </item>
+          <item>
+           <widget class="QTreeView" name="tree_components"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_reactions">
+         <attribute name="title">
+          <string>Reactions</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QComboBox" name="select_reactions"/>
+          </item>
+          <item>
+           <widget class="QTreeView" name="tree_reactions"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_units">
+         <attribute name="title">
+          <string>Units</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QComboBox" name="select_units"/>
+          </item>
+          <item>
+           <widget class="QTreeView" name="tree_units"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_streams">
+         <attribute name="title">
+          <string>Streams</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QComboBox" name="select_streams"/>
+          </item>
+          <item>
+           <widget class="QTreeView" name="tree_streams"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_sensors">
+         <attribute name="title">
+          <string>Sensors</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QComboBox" name="select_sensors"/>
+          </item>
+          <item>
+           <widget class="QTreeView" name="tree_sensors"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_disturbances">
+         <attribute name="title">
+          <string>Disturbances</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="QComboBox" name="select_disturbances"/>
+          </item>
+          <item>
+           <widget class="QTreeView" name="tree_disturbances"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_options">
+         <attribute name="title">
+          <string>Options</string>
+         </attribute>
+         <layout class="QFormLayout" name="formLayout_7">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_44">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="buddy">
+             <cstring>comboBox_7</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="comboBox_7"/>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QRadioButton" name="rb_fixed_sim">
+            <property name="text">
+             <string>Fixed Simulation Time</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="QRadioButton" name="rb_continuous_sim">
+            <property name="text">
+             <string>Continuous Simulation</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="options_flowsheet_layout" stretch="8,1">
+        <item>
+         <widget class="QOpenGLWidget" name="flowsheet_viewer"/>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="progress_bar_layout" stretch="9,3,3">
+          <item>
+           <widget class="QProgressBar" name="progress_bar">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="value">
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="run_button">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Run</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="stop_button">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="visible">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Stop</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QPlainTextEdit" name="console_output">
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+      <property name="placeholderText">
+       <string>Tennessee Eastman Process Copyright (c) 2021 Hussein Saafan</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menu_bar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_file">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menu_import">
+     <property name="title">
+      <string>Import</string>
+     </property>
+     <addaction name="import_component"/>
+     <addaction name="import_reaction"/>
+     <addaction name="import_unit"/>
+    </widget>
+    <widget class="QMenu" name="menu_export">
+     <property name="title">
+      <string>Export</string>
+     </property>
+     <addaction name="export_data_stream"/>
+     <addaction name="export_output"/>
+    </widget>
+    <addaction name="menu_import"/>
+    <addaction name="menu_export"/>
+    <addaction name="menu_quit"/>
+   </widget>
+   <widget class="QMenu" name="menu_help">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="help_github"/>
+    <addaction name="help_about"/>
+   </widget>
+   <addaction name="menu_file"/>
+   <addaction name="menu_help"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="help_about">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="help_github">
+   <property name="text">
+    <string>GitHub</string>
+   </property>
+  </action>
+  <action name="import_component">
+   <property name="text">
+    <string>Component</string>
+   </property>
+  </action>
+  <action name="import_reaction">
+   <property name="text">
+    <string>Reaction</string>
+   </property>
+  </action>
+  <action name="import_unit">
+   <property name="text">
+    <string>Unit</string>
+   </property>
+  </action>
+  <action name="export_data_stream">
+   <property name="text">
+    <string>Data Stream</string>
+   </property>
+  </action>
+  <action name="export_output">
+   <property name="text">
+    <string>Run Output</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="menu_quit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>run_button</sender>
+   <signal>clicked()</signal>
+   <receiver>run_button</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>787</x>
+     <y>377</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>787</x>
+     <y>377</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stop_button</sender>
+   <signal>clicked()</signal>
+   <receiver>stop_button</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>374</x>
+     <y>375</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>375</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>run_button</sender>
+   <signal>clicked()</signal>
+   <receiver>stop_button</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>787</x>
+     <y>377</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>375</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stop_button</sender>
+   <signal>clicked()</signal>
+   <receiver>run_button</receiver>
+   <slot>show()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>374</x>
+     <y>375</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>787</x>
+     <y>377</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>menu_quit</sender>
+   <signal>triggered()</signal>
+   <receiver>main_window</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
