@@ -15,8 +15,6 @@ References
         problem,” Computers & Chemical Engineering, vol. 17, no. 3,
         pp. 245–255, 1993.
 """
-__author__ = "Hussein Saafan"
-
 import numpy as np
 
 

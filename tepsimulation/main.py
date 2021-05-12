@@ -3,10 +3,14 @@
 Main file used to start the TEP simulation program
 
 Takes the following arguments:
-TODO: add these arguments
-"""
-__author__ = "Hussein Saafan"
+    -h   --help     Display help information
+    -g   --gui      Use a GUI view
 
+    -p   --path     Sets the path to the settings directory
+    -t   --time     Total time to simulate for the process (in hours)
+    -dt  --step     Time step to use for the simulation (in hours)
+    -s   --seed     Seed to use for random numbder generation
+"""
 import argparse
 
 from controllers import Controller
@@ -24,7 +28,7 @@ parser.add_argument('-g', '--gui',
 cli_group.add_argument('-p', '--path',
                        help='change the default settings directory',
                        type=str,
-                       default='./settings'
+                       default='settings/'
                        )
 cli_group.add_argument('-t', '--time',
                        help='the time to simulate in hours',

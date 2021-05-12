@@ -137,25 +137,25 @@ Unit Operations:
       Outlet: "Reactor Feed"
   Compressors:
     COMP:
-      File: "units/Compressor.yaml"
+      File: "settings/units/Compressor.yaml"
       Inlet: "Compressor Feed"
       Outlet: "Compressor Outlet"
   Heat Exchangers:
     COND:
-      File: "units/Condenser.yaml"
+      File: "settings/units/Condenser.yaml"
       Hot Inlet: "Reactor Product"
       Hot Outlet: "Separator Feed"
       Cold Inlet: "Condenser Jacket CW Inlet"
       Cold Outlet: "Condenser Jacket CW Outlet"
     REBOIL:
-      File: "units/Reboiler.yaml"
+      File: "settings/units/Reboiler.yaml"
       Hot Inlet: "Reboiler Steam"
       Hot Outlet: "Reboiler Condensate"
       Cold Inlet: "Reboiler Feed"
       Cold Outlet: "Reboiler Product"
   Reactors:
     REAC:
-      File: "units/Reactor.yaml"
+      File: "settings/units/Reactor.yaml"
       Inlet: ["A Feed", "D Feed", "E Feed", "Reactor Recycle"]
       Outlet: "Reactor Product"
       Jacket:
@@ -163,14 +163,14 @@ Unit Operations:
         Outlet: "Reactor Jacket CW Outlet"
   Separators:
     SEP:
-      File: "units/Separator.yaml"
+      File: "settings/units/Separator.yaml"
       Inlet: "Separator Feed"
       Outlet:
         Vapor: "Separator Overhead"
         Liquid: "Separator Underflow"
   Strippers:
     STRIP:
-      File: "units/Stripper.yaml"
+      File: "settings/units/Stripper.yaml"
       Inlet: ["C Feed", "Separator Liquid", "Reboiler Product"]
       Outlet:
         Vapor: "Stripper Overhead"

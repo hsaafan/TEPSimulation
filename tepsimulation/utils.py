@@ -4,31 +4,42 @@ Some helper functions for flowsheet simulation.
 
 Functions
 ---------
+get_prng
+    Generate a pseduo random number using the same method as the original TEP
+    simulation. Number is in the range of [-1, 1]
+get_prng_pos
+    Generate a pseduo random number using the same method as the original TEP
+    simulation. Number is in the range of [0, 1]
+get_noise
+    Generate noise using a standard deviation input
+import_yaml
+    Import a YAML file
+import_yaml_folder
+    Import all YAML files from a folder
 """
-__author__ = "Hussein Saafan"
 
 import os
 import yaml
 
 
-def get_prng():
+def get_prng(seed):
     """ Pseudo Random Number Generator
 
     Returns a value in the range [-1, 1]
     """
     seed = (seed * 9228907) % 4294967296
     ret_val = 2 * seed / 4294967296 - 1
-    return(ret_val)
+    return(ret_val, seed)
 
 
-def get_prng_pos():
+def get_prng_pos(seed):
     """ Pseudo Random Number Generator
 
     Returns a value in the range [0, 1]
     """
     seed = (seed * 9228907) % 4294967296
     ret_val = seed / 4294967296
-    return(ret_val)
+    return(ret_val, seed)
 
 
 def get_noise(stdv):

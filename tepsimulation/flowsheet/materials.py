@@ -7,8 +7,6 @@ Classes
 Material: class
     A material
 """
-__author__ = "Hussein Saafan"
-
 import math
 
 import pint

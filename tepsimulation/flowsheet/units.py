@@ -30,13 +30,12 @@ VaporLiquidSperator: UnitOperation
 FlowSheet: class
     The flow sheet that contains connections and initial states
 """
-__author__ = "Hussein Saafan"
 import warnings
 import pint
 from random import randint
 
 import utils
-from materials import Reaction
+from flowsheet.materials import Reaction
 
 UNITREG = pint.UnitRegistry()
 UNIT = UNITREG.Quantity
@@ -197,6 +196,10 @@ class UnitOperation(FlowSheetObject):
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     temperature = property(**temperature())
+
+    def step(self, time_step: float):
+        # TODO: Add dummy functions
+        pass
 
 
 class Split(UnitOperation):
@@ -570,8 +573,6 @@ class FlowSheet:
     order: list
         Contains each unit operation in 'units' and the order of this
         list determines the order of flowsheet calculation
-    seed: int
-        The seed used for pseudo random number generation
 
     Methods
     -------
@@ -585,36 +586,12 @@ class FlowSheet:
         Adds unit operations as their respective object type. Called by
         import_flowsheet.
     """
-    _seed = None
     streams = {}
     units = {}
     order = []
 
     def __init__(self, materials: dict, flowsheet_file: str):
         self.import_flowsheet(flowsheet_file)
-
-    def seed():
-        doc = """Flowsheet seed for noise"""
-
-        def fget(self):
-            """Returns the seed."""
-            return(f"{self._seed}")
-
-        def fset(self, value):
-            """Sets the seed."""
-            if self._seed is not None:
-                raise RuntimeError("Seed has already been set")
-            elif value is None:
-                value = randint(1, 1e6)
-                warnings.warn(f"Seed has been automatically set: {value}",
-                              RuntimeWarning)
-            elif not isinstance(value, int):
-                raise TypeError(f"Expected an integer seed, "
-                                f"got a {type(value)} instead")
-            self._seed = value
-
-        return({'fget': fget, 'fset': fset, 'doc': doc})
-    seed = property(**seed())
 
     def import_streams(self, streams_dict: dict):
         """Imports a stream dictionary into a MatStream object"""

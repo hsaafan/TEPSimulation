@@ -1,74 +1,108 @@
-""" Controllers
+import datetime
 
-Controllers are used to communicate between the views and models
-"""
 from models import Model
 from views import GUIView, CLIView
 
 
 class Controller:
-    view = None
-    model = None
+    """ Program Controller class
 
-    has_gui = False
-    view = None
-    model = None
-    controller = None
+    Used to communicate with model and view
+    Attributes
+    ----------
+
+    Methods
+    -------
+    output_to_console
+        Relays information to the view object to be shown to the user
+    toggle_sim_type
+        Sets the simulation type to run for a fixed time and output the data
+        or continuously run the simulation and output a data stream
+    run
+        Start the simulation
+    stop
+        Stops the current simulation
+    reset
+        Resets the simulation
+    update_progress
+        Calculate the model progress and update the view
+    process_gui
+        Process events to prevent model from locking GUI
+    """
+    _view = None
+    _model = None
 
     # Setup methods
     def __init__(self, use_gui: bool = True, seed: int = None,
                  time: float = 24, time_step: float = 0.1,
-                 path: str = "./settings"):
+                 path: str = "settings/"):
+        # Create view and model objects
         if use_gui:
-            self.view = GUIView()
+            self._view = GUIView()
         else:
-            self.view = CLIView()
-        self.model = Model()
+            self._view = CLIView()
+        self._model = Model()
 
-        self.view.connect_controller(self)
-        self.model.connect_controller(self)
+        # Connect view and model objects
+        self._view.connect_controller(self)
+        self._model.connect_controller(self)
 
-        self.model.set_seed(seed)
-        self.model.set_time(time, time_step)
-        self.model.set_settings_path(path)
-        self.start_program()
+        # Set model parameters
+        self._model.seed = seed
+        self._model.simulation_time = time
+        self._model.time_step = time_step
+        self._model.settings_directory = path
 
-    def start_program(self):
-        self.view.start()
+        self._model.import_settings()
+
+        # Start the view
+        self._view.start()
 
     def output_to_console(self, text: str):
-        self.view.output_to_console(text)
-
-    # Action methods
-    def open_window(self):
-        self.view.show_window()
-        sys.exit(self._app.exec_())
+        """ Output message to console with a timestamp """
+        curr_time = datetime.datetime.now().strftime("%H:%M:%S")
+        time_stamp = f"[{curr_time}]: "
+        self._view.output_to_console(time_stamp + text)
 
     # Tabs
-    def toggle_continuous_sim(self):
-        # TODO
-        return
-
-    def toggle_fixed_sim(self):
-        # TODO
-        return
+    def toggle_sim_type(self, sim_type: int):
+        # TODO make this do something
+        if sim_type == 0:
+            # Fixed time simulation
+            pass
+        elif sim_type == 1:
+            # Continuously runnning simulation
+            pass
+        else:
+            raise RuntimeError("Simulation type not found")
 
     # Other
     def run(self):
-        self.model.run()
+        """ Start the model simulation """
+        self.output_to_console(f'Started simulation')
+        self._model.run(isinstance(self._view, GUIView))
 
     def stop(self):
-        self.model.stop()
-        return
+        """ Force stop the simulation """
+        self.output_to_console(f'Stopped simulation')
+        self._model.force_stop()
+        self.reset()
 
     def reset(self):
-        self.model._current_step = 0
-        self.model.STOP_SIGNAL = False
-        self.view.update_progress_bar(0)
+        """ Reset the model and view once simulation has stopped """
+        self._model.reset_model()
+        self._view.reset_view()
 
     # Signal methods
     def update_progress(self):
-        current_time = self.model._current_step * self.model._time_step
-        total_time = self.model._total_step_count * self.model._time_step
+        """ Calculate the percent finished and update the view """
+        current_time = self._model._current_step * self._model._time_step
+        total_time = self._model._total_step_count * self._model._time_step
         percent_done = current_time / total_time * 100
-        self.view.update_progress(percent_done)
+        self._view.update_progress(percent_done)
+
+    def process_gui(self):
+        """ Process any gui events to prevent locking """
+        if not isinstance(self._view, GUIView):
+            raise RuntimeError("Cannot process GUI events, no GUI found")
+        self._view._app.processEvents()
