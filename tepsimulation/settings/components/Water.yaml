@@ -1,16 +1,33 @@
 Name: Water
-Antoines A: 
-Antoines B: 
-Antoines C: 
-# Temperature in C, Pressure in Pa, P=exp(A+B/(T+C))
-Molar Mass: 18.0
-Liquid Density A: 
-Liquid Density B: 
-Liquid Density C: 
-Liquid Specific Enthalpy A: 
-Liquid Specific Enthalpy B: 
-Liquid Specific Enthalpy C: 
-Vaporization Heat: 
-Gas Specific Enthalpy A: 
-Gas Specific Enthalpy B: 
-Gas Specific Enthalpy C: 
+# FIXME
+Molar Mass:
+  Value: 18.0
+  Units: g / mol
+Antoines:
+  A: 0
+  B: 0
+  C: 0
+  Base: 2.71828
+  Pressure Units: Pa
+  Temperature Units: C
+Liquid Density:
+  A: 0
+  B: 0
+  C: 0
+  Temperature Units: C
+  Density Units: lb / ft ** 3
+Liquid Specific Enthalpy:
+  A: 0
+  B: 0
+  C: 0
+  Temperature Units: C
+  Enthalpy Units: cal / g
+Gas Specific Enthalpy:
+  A: 0
+  B: 0
+  C: 0
+  Temperature Units: C
+  Enthalpy Units: cal / g
+Vaporization Heat:
+  Value: 0
+  Units: btu / lb

@@ -1,16 +1,33 @@
 Name: A
-Antoines A: 0
-Antoines B: 0
-Antoines C: 0
+Molar Mass:
+  Value: 2.0
+  Units: g / mol
+Antoines:
+  A: 0
+  B: 0
+  C: 0
+  Base: 2.71828
+  Pressure Units: Pa
+  Temperature Units: C
 # Noncondensible
-Molar Mass: 2.0
-Liquid Density A: 1.0
-Liquid Density B: 0.0
-Liquid Density C: 0.0
-Liquid Specific Enthalpy A: 1.0
-Liquid Specific Enthalpy B: 0.0
-Liquid Specific Enthalpy C: 0.0
-Vaporization Heat: 1.0
-Gas Specific Enthalpy A: 3.441
-Gas Specific Enthalpy B: 7.18e-4
-Gas Specific Enthalpy C: 6.0e-7
+Liquid Density:
+  A: 1.0
+  B: 0.0
+  C: 0.0
+  Temperature Units: C
+  Density Units: lb / ft ** 3
+Liquid Specific Enthalpy:
+  A: 1.0
+  B: 0.0
+  C: 0.0
+  Temperature Units: C
+  Enthalpy Units: cal / g
+Gas Specific Enthalpy:
+  A: 3.441
+  B: 7.18e-4
+  C: 6.0e-7
+  Temperature Units: C
+  Enthalpy Units: cal / g
+Vaporization Heat:
+  Value: 1.0
+  Units: btu / lb

@@ -1,16 +1,32 @@
 Name: G
-Antoines A: 21.32
-Antoines B: -2748.0
-Antoines C: 232.9
-# Temperature in C, Pressure in Pa, P=exp(A+B/(T+C))
-Molar Mass: 62.0
-Liquid Density A: 49.9
-Liquid Density B: -0.0191
-Liquid Density C: -0.000425
-Liquid Specific Enthalpy A: 0.515
-Liquid Specific Enthalpy B: 5.65e-4
-Liquid Specific Enthalpy C: 3.82e-6
-Vaporization Heat: 225.0
-Gas Specific Enthalpy A: 0.170
-Gas Specific Enthalpy B: 0
-Gas Specific Enthalpy C: 0
+Molar Mass:
+  Value: 62.0
+  Units: g / mol
+Antoines:
+  A: 21.32
+  B: -2748.0
+  C: 232.9
+  Base: 2.71828
+  Pressure Units: Pa
+  Temperature Units: C
+Liquid Density:
+  A: 49.9
+  B: -0.0191
+  C: -0.000425
+  Temperature Units: C
+  Density Units: lb / ft ** 3
+Liquid Specific Enthalpy:
+  A: 0.515
+  B: 5.65e-4
+  C: 3.82e-6
+  Temperature Units: C
+  Enthalpy Units: cal / g
+Gas Specific Enthalpy:
+  A: 0.170
+  B: 0
+  C: 0
+  Temperature Units: C
+  Enthalpy Units: cal / g
+Vaporization Heat:
+  Value: 225.0
+  Units: btu / lb
