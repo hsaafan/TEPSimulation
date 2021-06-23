@@ -19,6 +19,7 @@ class FlowSheet:
         if unit_op.id in self.unit_operations.keys():
             warnings.warn(f"Unit {unit_op.id} already exists, overriding")
         self.unit_operations[unit_op.id] = unit_op
+        return
 
     def add_stream(self, stream: base.Stream,
                    source_id: str, sink_id: str,
@@ -41,8 +42,23 @@ class FlowSheet:
         self.streams[stream.id] = stream
         return
 
-    def add_sensor(self, sensor: sensors.Sensor, sensor_id: str):
-        pass
+    def add_sensor(self, sensor: sensors.Sensor, target: list,
+                   offset: pint.Quantity = None, stdv: pint.Quantity = None):
+        if sensor.id in self.sensors.keys():
+            warnings.warn(f"Sensor {sensor.id} already exists, overriding")
+
+        sensor.flowsheet = self  # Attach flowsheet to sensor
+
+        # Setup sensor
+        sensor.hook(target)
+        if offset is not None:
+            sensor.sensor_offset = offset
+        if stdv is not None:
+            sensor.sensor_stdv = stdv
+
+        # Add sensor to flowsheet data
+        self.sensors[sensor.id] = sensor
+        return
 
     def get_sensor_order(self):
         sensor_order = []
