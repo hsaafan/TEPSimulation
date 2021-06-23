@@ -2,6 +2,7 @@ import datetime
 
 from models import Model
 from views import GUIView, CLIView
+import packages.utils as utils
 
 
 class Controller:
@@ -29,13 +30,9 @@ class Controller:
     process_gui
         Process events to prevent model from locking GUI
     """
-    _view = None
-    _model = None
-
     # Setup methods
-    def __init__(self, use_gui: bool = True, seed: int = None,
-                 time: float = 24, time_step: float = 0.1,
-                 path: str = "settings/"):
+    def __init__(self, use_gui: bool = True, time: float = 24,
+                 time_step: float = 0.1, path: str = "settings/"):
         # Create view and model objects
         if use_gui:
             self._view = GUIView()
@@ -48,7 +45,6 @@ class Controller:
         self._model.connect_controller(self)
 
         # Set model parameters
-        self._model.seed = seed
         self._model.simulation_time = time
         self._model.time_step = time_step
         self._model.settings_directory = path
@@ -79,7 +75,7 @@ class Controller:
     # Other
     def run(self):
         """ Start the model simulation """
-        self.output_to_console(f'Started simulation')
+        self.output_to_console(f'Started with seed {utils.get_seed()}')
         self._model.run(isinstance(self._view, GUIView))
 
     def stop(self):

@@ -5,7 +5,7 @@ import PyQt5.QtWidgets as qtw
 import PyQt5.QtCore as qtc
 from PyQt5.QtGui import QDesktopServices
 
-from ui_tep import windows
+from packages.ui_tep import windows
 
 
 class View:
@@ -34,11 +34,6 @@ class View:
     open_github
         Opens a link to the programs GitHubs
     """
-    _controller = None
-
-    def __init__(self):
-        return
-
     def connect_controller(self, controller):
         self._controller = controller
 
@@ -101,10 +96,6 @@ class GUIView(View):
 
     See the View class documentation for information on methods and attributes
     """
-    _app = None
-    _main_window = None
-    _about_dialog = None
-
     def __init__(self):
         """ Create the Qt windows """
         self._app = qtw.QApplication(sys.argv)

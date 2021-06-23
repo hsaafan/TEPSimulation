@@ -1,1 +1,3 @@
-Volume: 3500.00 # Cubic Feet
+Volume: 
+  val: 3500.00
+  units: ft^3

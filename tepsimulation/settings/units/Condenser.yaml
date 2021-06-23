@@ -1,1 +1,3 @@
-Volume: 156.5 # Cubic Feet
+Volume: 
+  val: 156.5
+  units: ft^3

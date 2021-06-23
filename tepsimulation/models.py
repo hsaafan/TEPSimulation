@@ -1,9 +1,9 @@
-from random import randint
 from math import ceil
 from time import sleep
+from os import getcwd
 
-import flowsheet.materials as materials
-import flowsheet.units as units
+import packages.materials as materials
+import packages.graph.flowsheet as flowsheet
 
 
 class Model:
@@ -14,8 +14,6 @@ class Model:
     ----------
     is_running: bool
         Is the simulation currently running
-    seed: int
-        The seed used for random number generation
     settings_directory: str
         The path to the settings folder
     simulation_time: float
@@ -44,46 +42,11 @@ class Model:
     step_model
         Move the model one step forward
     """
-    _controller = None
-
-    _materials = None
-    _reactions = None
-    _flowsheet = None
-
-    _seed = None
-    _settings_directory = None
-    _simulation_time = None
-    _time_step = None
-    _total_step_count = None
-
-    _current_step = None
-    _console_buffer = ""
-
-    is_running = False
+    def __init__(self):
+        self._console_buffer = ""
+        self.is_running = False
 
     # Properties
-    def seed():
-        doc = """Model seed for rng"""
-
-        def fget(self):
-            """Returns the seed."""
-            return(self._seed)
-
-        def fset(self, value: int):
-            """Sets the seed."""
-            if value is None:
-                value = randint(1, 1e6)
-            elif not isinstance(value, int):
-                raise TypeError(f"Expected an integer seed, "
-                                f"got a {type(value)} instead")
-            elif value <= 0:
-                raise RuntimeError("Seed must be a positive integer")
-            self._seed = value
-            self.append_console_buffer(f"Seed has been set to {value}")
-
-        return({'fget': fget, 'fset': fset, 'doc': doc})
-    seed = property(**seed())
-
     def settings_directory():
         doc = """Directory of settings files"""
 
@@ -92,13 +55,18 @@ class Model:
             return(f"{self._settings_directory}")
 
         def fset(self, directory: str):
-            """Sets the seed."""
+            """Sets the path to the settings directory."""
             if directory is None:
-                self._settings_directory = "settings/"
+                self._settings_directory = getcwd() + "/settings/"
             elif not isinstance(directory, str):
                 raise TypeError(f"Expected a string value for the directory, "
                                 f"got a {type(directory)} instead")
-            self._settings_directory = directory
+            if directory[0] == '/':
+                # Passed directory is absolute
+                self._settings_directory = directory
+            else:
+                # Assume relative
+                self._settings_directory = getcwd() + "/" + directory
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     settings_directory = property(**settings_directory())
@@ -118,8 +86,14 @@ class Model:
             elif value <= 0:
                 raise RuntimeError("Time must be a positive value")
             self._simulation_time = value
-            if self.time_step is not None:
-                steps = ceil(self.simulation_time / self.time_step)
+
+            try:
+                step = self.time_step
+            except AttributeError:
+                step = None
+
+            if step is not None:
+                steps = ceil(self.simulation_time / step)
                 self._total_step_count = steps
                 self._current_step = 0
 
@@ -141,7 +115,12 @@ class Model:
             elif value <= 0:
                 raise RuntimeError("Time step must be a positive value")
             self._time_step = value
-            if self.simulation_time is not None:
+
+            try:
+                time = self.simulation_time
+            except AttributeError:
+                time = None
+            if time is not None:
                 steps = ceil(self.simulation_time / self.time_step)
                 self._total_step_count = steps
                 self._current_step = 0
@@ -183,7 +162,7 @@ class Model:
         self._materials = materials.import_materials(mat_dir)
         self._reactions = materials.import_reactions(rxn_dir)
         fs_dir = self._settings_directory + "flowsheet.yaml"
-        self._flowsheet = units.FlowSheet(self._materials, fs_dir)
+        self._flowsheet = flowsheet.FlowSheet()
 
     # Runtime methods
     def append_console_buffer(self, text: str):

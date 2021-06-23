@@ -3,14 +3,10 @@
 The flowsheet is implemented as a graph where the streams are the edges
 and the unit operations are the nodes
 
-Functions
----------
-pint_check
-    Used for error checking to make sure that a value passed is a pint Quantity
-    object of the appropriate dimensionality
-
 Classes
 -------
+FlowSheetObject
+    Base class for streams and unit operations
 Stream
     Generic Stream class, acts as 'edges' of flowsheet 'graph'
 UnitOperation
@@ -23,8 +19,52 @@ Outlet
 """
 import pint
 
+from ... import utils
 
-class Stream:
+
+class FlowSheetObject:
+    """ Generic flowsheet object class
+
+    This class is used as a base for all flowsheet objects and handles common
+    tasks.
+
+    Attributes
+    ----------
+    id: str
+        User set label for identifying object
+    """
+
+    def __init__(self, id: str):
+        self.id = id
+
+    def temperature():
+        doc = """Current temperature"""
+
+        def fget(self):
+            return(self._temperature)
+
+        def fset(self, value):
+            if utils.pint_check(value, '[temperature]'):
+                self._temperature = value
+
+        return({'fget': fget, 'fset': fset, 'doc': doc})
+    temperature = property(**temperature())
+
+    def pressure():
+        doc = """Current pressure"""
+
+        def fget(self):
+            return(self._pressure)
+
+        def fset(self, value):
+            if utils.pint_check(value, '[pressure]'):
+                self._pressure = value
+
+        return({'fget': fget, 'fset': fset, 'doc': doc})
+    pressure = property(**pressure())
+
+
+class Stream(FlowSheetObject):
     """ Stream class
 
     The streams are though of as the edges of a graph. These objects contain
@@ -36,8 +76,6 @@ class Stream:
 
     Attributes
     ----------
-    id: str
-        User set label for identifying stream
     source: UnitOperation
         The inlet of the stream
     sink: UnitOperation
@@ -45,10 +83,28 @@ class Stream:
     """
 
     def __init__(self, id: str):
-        self.id = id
+        super().__init__(id)
 
     def __str__(self):
-        return(f"{self._source.id} ----> {self._sink.id}")
+        try:
+            str_repr = f"{self.id}: {self._source.id} ----> {self._sink.id}"
+        except AttributeError:
+            str_repr = f"{self.id}: Broken connection"
+        return(str_repr)
+
+    def pressure():
+        doc = """Pressure difference of source and sink"""
+
+        def fget(self):
+            pressure_diff = self.sink.pressure - self.source.pressure
+            return(pressure_diff)
+
+        def fset(self, value):
+            raise AttributeError(f"Attempted to set pressure of stream "
+                                 f"{self.id}")
+
+        return({'fget': fget, 'fset': fset, 'doc': doc})
+    pressure = property(**pressure())
 
     def source():
         doc = """Where the stream starts"""
@@ -75,7 +131,7 @@ class Stream:
     sink = property(**sink())
 
 
-class UnitOperation:
+class UnitOperation(FlowSheetObject):
     """ Generic Unit Operation class
 
     Acts as a template for other unit operation classes but should not be used
@@ -83,16 +139,10 @@ class UnitOperation:
 
     Attributes
     -----------
-    id: str
-        User set label for identifying unit operation
     outlets: dict
         The outlets of the unit operation
     inlets: dict
         The inlets of the unit operation
-    temperature: pint.Quantity
-        The current temperature of the unit operation
-    pressure: pint.Quantity
-        The current pressure of the unit operation
 
     Methods
     --------
@@ -101,15 +151,27 @@ class UnitOperation:
     add_outlet
         Adds a Stream object to the unit operation outlets dictionary
     step
-        Template for child classes, not implemented here
+        Moves the unit operation forward by a timestep; this should not be
+        overriden in child classes, override step_preprocess, step_events, or
+        step_postprocess instead
+    step_preprocess
+        Error checking that happens before a time step occurs
+    step_events
+        All the events that constitute a time step. For example, a reactor
+        would include reactions, temperature changes, pressure changes, etc.
+        here. This should be overriden by any child classes, as it will throw
+        an error otherwise.
+    step_postprocess
+        Cleanup operations after a step has occurred, these could be included
+        in step_events instead but this is provided as a way of keeping the
+        code clean
     """
     def __init__(self, id: str):
+        super().__init__(id)
         self.outlets = dict()
         self.inlets = dict()
         self._temperature = None
         self._pressure = None
-
-        self.id = id
 
     def __str__(self):
         incoming = []
@@ -123,40 +185,33 @@ class UnitOperation:
 
         return(f'{incoming} ---> {self.id} ---> {outgoing}')
 
-    def temperature():
-        doc = """Unit Operation operating temperature"""
-
-        def fget(self):
-            return(self._temperature)
-
-        def fset(self, value):
-            if pint_check(value, '[temperature]'):
-                self._temperature = value
-
-        return({'fget': fget, 'fset': fset, 'doc': doc})
-    temperature = property(**temperature())
-
-    def pressure():
-        doc = """Node operating pressure"""
-
-        def fget(self):
-            return(self._pressure)
-
-        def fset(self, value):
-            if pint_check(value, '[pressure]'):
-                self._pressure = value
-
-        return({'fget': fget, 'fset': fset, 'doc': doc})
-    pressure = property(**pressure())
-
     def add_inlet(self, stream: Stream, inlet_id: str = "inlet"):
+        if inlet_id in self.inlets.keys():
+            raise RuntimeWarning(f"{stream.id} is overwriting an inlet of "
+                                 f"{self.id}")
         self.inlets[inlet_id] = stream
+        stream.sink = self
 
     def add_outlet(self, stream: Stream, outlet_id: str = "outlet"):
+        if outlet_id in self.inlets.keys():
+            raise RuntimeWarning(f"{stream.id} is overwriting an outlet of "
+                                 f"{self.id}")
         self.outlets[outlet_id] = stream
+        stream.source = self
 
-    def step(self):
+    def step_preprocess(self, time_step: pint.Quantity):
+        utils.pint_check(time_step, '[time]')
+
+    def step_events(self, time_step: pint.Quantity):
         raise NotImplementedError
+
+    def step_postprocess(self):
+        pass
+
+    def step(self, time_step: pint.Quantity):
+        self.step_preprocess(time_step)
+        self.step_events()
+        self.step_postprocess()
 
 
 class Inlet(UnitOperation):
@@ -199,19 +254,3 @@ class Outlet(UnitOperation):
 
     def add_outlet(self, stream: Stream, outlet_id: str = ""):
         raise RuntimeError("Cannot add outlet streams to flowsheet outlets")
-
-
-def pint_check(value, exp_units):
-    """ Error checking for a pint object
-
-    exp_units is the dimensionality and should include the brackets, for
-    example to check that a value passed is a velocity, you could pass
-    '[length] / [time]' or '[velocity]'
-    """
-    if not isinstance(value, pint.Quantity):
-        raise TypeError(f"Expected a pint Quantity object, "
-                        f"got a {type(value)} instead")
-    elif not value.check(exp_units):
-        raise TypeError(f"Expected dimensionality of {exp_units}, got "
-                        f"{value.dimensionality} instead")
-    return(True)

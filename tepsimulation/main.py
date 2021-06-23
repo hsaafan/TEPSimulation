@@ -12,9 +12,8 @@ Takes the following arguments:
     -s   --seed     Seed to use for random numbder generation
 """
 import argparse
-
+import packages.utils as utils
 from controllers import Controller
-
 
 parser = argparse.ArgumentParser()
 cli_group = parser.add_argument_group()
@@ -46,8 +45,9 @@ cli_group.add_argument('-s', '--seed',
 args = parser.parse_args()
 
 
+utils.set_seed(args.seed)
+
 controller = Controller(use_gui=args.gui,
-                        seed=args.seed,
                         time=args.time,
                         time_step=args.step,
                         path=args.path)
