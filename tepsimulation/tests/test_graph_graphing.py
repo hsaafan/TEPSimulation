@@ -2,7 +2,7 @@ import pytest
 import pint
 
 from ..packages.graph import flowsheet
-from ..packages.graph.graphing import (base, heat_exchange,
+from ..packages.graph.graphing import (base, heat_exchange, sensors,
                                        streams, transport, vessels)
 
 
@@ -158,3 +158,33 @@ class TestFlowsheet:
         source = connected_flowsheet.unit_operations["Source"]
         stream = connected_flowsheet.streams["Stream"]
         assert (stream is source.outlets["Outlet"])
+
+    def test_add_sensor(self, connected_flowsheet):
+        s = sensors.Sensor("S1")
+        connected_flowsheet.add_sensor(s, ["streams", "Stream", "temperature"])
+        assert connected_flowsheet.sensors["S1"] == s
+
+    def test_poll_sensor(self, connected_flowsheet):
+        s = sensors.Sensor("S1")
+        connected_flowsheet.add_sensor(s, ["streams", "Stream", "temperature"])
+        temp = pint.Quantity('323 K')
+        connected_flowsheet.streams["Stream"].temperature = temp
+        data = connected_flowsheet.poll_sensors()
+        assert data[0] == temp
+
+    def test_generic_unit_operation(self, connected_flowsheet):
+        h = pint.Quantity("10 seconds")
+        with pytest.raises(NotImplementedError):
+            connected_flowsheet.unit_operations["Source"].step(h)
+
+    @pytest.mark.xfail(reason="Not implemented")
+    def test_step_reactor(self):
+        assert False
+
+    @pytest.mark.xfail(reason="Not implemented")
+    def test_step_stripper(self):
+        assert False
+
+    @pytest.mark.xfail(reason="Not implemented")
+    def test_step_heat_exchanger(self):
+        assert False

@@ -8,25 +8,25 @@ Antoines:
   C: 265.5
   Base: 2.71828
   Pressure Units: Pa
-  Temperature Units: C
+  Temperature Units: celsius
 Liquid Density:
   A: 33.9
   B: -0.0957
   C: -0.000152
-  Temperature Units: C
+  Temperature Units: celsius
   Density Units: lb / ft ** 3
 Liquid Specific Enthalpy:
   A: 0.573
   B: 2.41e-3
   C: 1.82e-5
-  Temperature Units: C
+  Temperature Units: celsius
   Enthalpy Units: cal / g
 Gas Specific Enthalpy:
   A: 0.3463
   B: 8.96e-4
   C: -3.27e-7
-  Temperature Units: C
+  Temperature Units: celsius
   Enthalpy Units: cal / g
 Vaporization Heat:
   Value: 160.0
-  Units: btu / lb
+  Units: british_thermal_unit / lb

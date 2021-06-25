@@ -95,8 +95,8 @@ def import_yaml(path):
     Opens a yaml file given the path and returns a dictionary
     object containing the yaml properties.
     """
-    stream = open(path, 'r')
-    yaml_object = yaml.load(stream, Loader=yaml.SafeLoader)
+    with open(path, 'r') as stream:
+        yaml_object = yaml.load(stream, Loader=yaml.SafeLoader)
     dict_to_lowercase(yaml_object)
     return(yaml_object)
 

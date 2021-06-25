@@ -1,4 +1,5 @@
 import pint
+import warnings
 
 from ... import utils
 
@@ -34,7 +35,7 @@ class Sensor:
     """
     def __init__(self, id: str):
         self.id = id
-        self.flowsheet = None
+        self._flowsheet = None
         self.target = []
         self.is_attached = False
         self.is_hooked = False
@@ -44,14 +45,26 @@ class Sensor:
 
     def _sensor_value_check(self, value, prop_name):
         if not isinstance(value, pint.Quantity):
-            raise UserWarning(f"{prop_name} for {self.id} has been set "
-                              f"without any units, this may cause "
-                              f"unexpected behaviour")
+            warnings.warn(f"{prop_name} for {self.id} has been set without "
+                          f"any units, this may cause unexpected behaviour")
         elif self.poll() is not None:
             utils.pint_check(value, self.poll().dimensionality)
         else:
-            raise UserWarning(f"Could not check {prop_name} of {self.id} "
-                              f"matches polled sensor units")
+            warnings.warn(f"Could not check {prop_name} of {self.id} matches "
+                          f"polled sensor units")
+
+    def flowsheet():
+        doc = """The flowsheet object the sensor hooks into"""
+
+        def fget(self):
+            return(self._flowsheet)
+
+        def fset(self, value):
+            self._flowsheet = value
+            self.is_attached = True
+
+        return({'fget': fget, 'fset': fset, 'doc': doc})
+    flowsheet = property(**flowsheet())
 
     def sensor_offset():
         doc = """Constant offset added to the value that the sensor polls"""
@@ -95,8 +108,8 @@ class Sensor:
             self.is_hooked = True
             self.target = target
         except (AttributeError, KeyError) as e:
-            raise SyntaxWarning(f"Cannot hook into {id} of {target}, check "
-                                f"that this attribute or key exists")
+            warnings.warn(f"Cannot hook into {id} of {target}, check that "
+                          f"this attribute or key exists", SyntaxWarning)
 
     def poll(self):
         if not (self.is_attached and self.is_hooked):

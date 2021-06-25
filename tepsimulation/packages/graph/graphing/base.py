@@ -18,6 +18,7 @@ Outlet
     flowsheet
 """
 import pint
+import warnings
 
 from ... import utils
 
@@ -36,6 +37,8 @@ class FlowSheetObject:
 
     def __init__(self, id: str):
         self.id = id
+        self._temperature = None
+        self._pressure = None
 
     def temperature():
         doc = """Current temperature"""
@@ -187,15 +190,13 @@ class UnitOperation(FlowSheetObject):
 
     def add_inlet(self, stream: Stream, inlet_id: str = "inlet"):
         if inlet_id in self.inlets.keys():
-            raise RuntimeWarning(f"{stream.id} is overwriting an inlet of "
-                                 f"{self.id}")
+            warnings.warn(f"{stream.id} is overwriting an inlet of {self.id}")
         self.inlets[inlet_id] = stream
         stream.sink = self
 
     def add_outlet(self, stream: Stream, outlet_id: str = "outlet"):
         if outlet_id in self.inlets.keys():
-            raise RuntimeWarning(f"{stream.id} is overwriting an outlet of "
-                                 f"{self.id}")
+            warnings.warn(f"{stream.id} is overwriting an outlet of {self.id}")
         self.outlets[outlet_id] = stream
         stream.source = self
 
@@ -210,7 +211,7 @@ class UnitOperation(FlowSheetObject):
 
     def step(self, time_step: pint.Quantity):
         self.step_preprocess(time_step)
-        self.step_events()
+        self.step_events(time_step)
         self.step_postprocess()
 
 

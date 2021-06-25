@@ -68,11 +68,11 @@ class FlowSheet:
 
     def poll_sensors(self):
         sensor_data = []
-        for sensor in self.sensors:
+        for id, sensor in self.sensors.items():
             sensor_data.append(sensor.poll())
         return(sensor_data)
 
     def step(self, time_step: pint.Quantity):
-        for unit_operation in self.unit_operations:
+        for id, unit_operation in self.unit_operations.items():
             unit_operation.step(time_step)
         return(self.poll_sensors())

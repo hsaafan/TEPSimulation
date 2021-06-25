@@ -9,6 +9,7 @@ Material: class
 """
 import math
 import os
+import warnings
 
 import pint
 
@@ -65,6 +66,11 @@ component_structure = utils.get_dict_structure(component_properties)
 
 class Component:
     def __init__(self, path: str):
+        self._properties = None
+        self.name = None
+        self.id = None
+        self._molar_mass = None
+        self._vaporization_heat = None
         self.load_file(path)
 
     def load_file(self, path: str):
@@ -72,17 +78,54 @@ class Component:
         for prop in component_structure:
             valid = utils.check_property_exists(yaml_dict, prop)
             if not valid:
-                raise RuntimeError(f"File '{path}' missing properties, must have "
-                                f"the following properties: property_structure")
+                raise RuntimeError(f"File '{path}' missing properties, must "
+                                   f"have the following properties: "
+                                   f"{component_structure}")
         self._properties = yaml_dict
-        self.name = self._properties["name"]
+        self._set_properties()
         ComponentList.add_component(self)
 
-    def get_molar_mass(self):
-        model = self._properties["molar mass"]
-        return(ureg(model["units"]) * model["value"])
+    def _set_properties(self):
+        self.name = self._properties["name"]
+        self.id = self.name  # alias
 
-    def get_vapor_pressure(self, temperature: Unit):
+        # Molar mass
+        value = self._properties["molar mass"]["value"]
+        units = self._properties["molar mass"]["units"]
+        self.molar_mass = pint.Quantity(value, units)
+
+        # Vaporization heat
+        value = self._properties["vaporization heat"]["value"]
+        units = self._properties["vaporization heat"]["units"]
+        self.vaporization_heat = pint.Quantity(value, units)
+
+    def molar_mass():
+        doc = """Molar mass of component"""
+
+        def fget(self):
+            return(self._molar_mass)
+
+        def fset(self, value):
+            if utils.pint_check(value, '[mass] / [substance]'):
+                self._molar_mass = value
+
+        return({'fget': fget, 'fset': fset, 'doc': doc})
+    molar_mass = property(**molar_mass())
+
+    def vaporization_heat():
+        doc = """Vaporization heat of component"""
+
+        def fget(self):
+            return(self._vaporization_heat)
+
+        def fset(self, value):
+            if utils.pint_check(value, '[energy] / [mass]'):
+                self._vaporization_heat = value
+
+        return({'fget': fget, 'fset': fset, 'doc': doc})
+    vaporization_heat = property(**vaporization_heat())
+
+    def vapor_pressure(self, temperature: pint.Quantity):
         """ Vapor Pressure as calculated by Antoine's equation """
         model = self._properties["antoines"]
         T_units = model["temperature units"]
@@ -97,7 +140,7 @@ class Component:
         p_vap = ureg(P_units) * base ** (A + B / (C + T))
         return(p_vap)
 
-    def get_liquid_density(self, temperature: Unit):
+    def liquid_density(self, temperature: pint.Quantity):
         """ Liquid Density as calculated from a polynomial model """
         model = self._properties["liquid density"]
         T_units = model["temperature units"]
@@ -111,7 +154,7 @@ class Component:
         rho_l = ureg(rho_units) * (A + (B + C * T) * T)
         return(rho_l)
 
-    def get_liquid_specific_enthalpy(self, temperature: Unit):
+    def liquid_specific_enthalpy(self, temperature: pint.Quantity):
         """ Liquid Specific Enthalpy as calculated from a polynomial model """
         h_model = self._properties["liquid specific enthalpy"]
         T_units = h_model["temperature units"]
@@ -128,7 +171,7 @@ class Component:
         H += h_vap
         return(H)
 
-    def get_gas_specific_enthalpy(self, temperature: Unit):
+    def gas_specific_enthalpy(self, temperature: pint.Quantity):
         """ Gas Specific Enthalpy as calculated from a polynomial model """
         h_model = self._properties["gas specific enthalpy"]
         T_units = h_model["temperature units"]
@@ -145,7 +188,7 @@ class Component:
         H += h_vap
         return(H)
 
-    def get_liquid_specific_enthalpy_change(self, temperature: Unit):
+    def liquid_specific_enthalpy_change(self, temperature: pint.Quantity):
         """
         Liquid Specific Enthalpy Change as
         calculated from a polynomial model
@@ -163,7 +206,7 @@ class Component:
         dH = ureg(h_units) * (A + (B + C * T) * T)
         return(dH)
 
-    def get_gas_specific_enthalpy_change(self, temperature: Unit):
+    def gas_specific_enthalpy_change(self, temperature: pint.Quantity):
         """
         Gas Specific Enthalpy Change as
         calculated from a polynomial model
@@ -200,7 +243,8 @@ class ComponentList:
 
     def add_component(comp: Component):
         if comp.name in ComponentList.get_component_names():
-            raise Exception(f"Component {comp.name} already exists")
+            warnings.warn(f"Component {comp.name} already exists, overriding")
+
         elif ComponentList.list_created:
             raise RuntimeError("Cannot add new components once a "
                                "component list has been created")
