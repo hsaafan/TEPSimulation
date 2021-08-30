@@ -61,7 +61,28 @@ component_properties = {
         "units": None
     }
 }
-component_structure = utils.get_dict_structure(component_properties)
+
+reaction_properties = {
+    "name": None,
+    "components": None,
+    "stoichiometry": None,
+    "rate order": None,
+    "phase": None,
+    "enthalpy": {
+        "value": None,
+        "units": None
+    },
+    "arrhenius": {
+        "a": {
+            "value": None,
+            "units": None
+        },
+        "ea": {
+            "value": None,
+            "units": None
+        }
+    }
+}
 
 
 class Component:
@@ -75,12 +96,10 @@ class Component:
 
     def load_file(self, path: str) -> None:
         yaml_dict = utils.import_yaml(path)
-        for prop in component_structure:
-            valid = utils.check_property_exists(yaml_dict, prop)
-            if not valid:
-                raise RuntimeError(f"File '{path}' missing properties, must "
-                                   f"have the following properties: "
-                                   f"{component_structure}")
+        if not utils.compare_dict_struct(yaml_dict, component_properties):
+            raise RuntimeError(f"File '{path}' missing properties, must "
+                               f"have the following properties: "
+                               f"{component_structure}")
         self._properties = yaml_dict
         self._set_properties()
         ComponentList.add_component(self)
@@ -397,34 +416,55 @@ class ComponentList:
 
 class Reaction:
     # TODO add registry like components and standardize import functions
-    def __init__(self, reaction_dict: dict) -> None:
-        self.import_dict(reaction_dict)
+    def __init__(self, path: str) -> None:
+        self.name = None
+        self.components = None
+        self.stoich = None
+        self.order = None
+        self.rate_parameters = dict()
+        self.phase = None
+        self.enthalpy = None
+        self.load_file(path)
 
-    def import_dict(self, reaction_dict: dict) -> None:
+    def load_file(self, path: str) -> None:
+        yaml_dict = utils.import_yaml(path)
+        if not utils.compare_dict_struct(yaml_dict, reaction_properties):
+            raise RuntimeError(f"File '{path}' missing properties, must "
+                               f"have the following properties: "
+                               f"{reaction_structure}")
+        self._properties = yaml_dict
+        self._set_properties()
+        ReactionList.add_reaction(self)
+
+    def _set_properties(self) -> None:
+        self.name = self._properties["name"]
+        self.id = self.name  # alias
+
         # Reaction Stoichiometry
-        self.label = reaction_dict["name"]
-        self.components = reaction_dict["components"]
-        self.stoich = reaction_dict["stoichiometry"]
+        self.components = self._properties["components"]
+        self.stoich = self._properties["stoichiometry"]
         if len(self.components) != len(self.stoich):
-            raise IndexError(f"{self.label}: Component and stoichiometry "
+            raise IndexError(f"{self.name}: Component and stoichiometry "
                              f"length must match")
+
         # Reaction Rates
-        self.order = reaction_dict["rate order"]
+        self.order = self._properties["rate order"]
         if len(self.components) != len(self.order):
-            raise IndexError(f"{self.label}: Component and order "
+            raise IndexError(f"{self.name}: Component and order "
                              f"length must match")
-        arrhenius = reaction_dict["arrhenius"]
+        arrhenius = self._properties["arrhenius"]
         A = arrhenius["a"]
         Ea = arrhenius["ea"]
-        self.rate_parameters["A"] = Unit(A["val"], A["units"])
-        self.rate_parameters["Ea"] = Unit(Ea["val"], Ea["units"])
+        self.rate_parameters["A"] = Unit(A["value"], A["units"])
+        self.rate_parameters["Ea"] = Unit(Ea["value"], Ea["units"])
+
         # Other Properties
-        phase = reaction_dict["phase"].lower()
+        phase = self._properties["phase"].lower()
         if phase not in ["gas", "vapor", "vap", "liquid", "liq"]:
             raise ValueError(f"Invalid phase: {phase}")
         self.phase = phase
-        H = reaction_dict["enthalpy"]
-        self.enthalpy = Unit(H["val"], H["units"])
+        H = self._properties["enthalpy"]
+        self.enthalpy = Unit(H["value"], H["units"])
 
     def arrhenius(self, temperature: pint.Quantity) -> pint.Quantity:
         T = temperature.to(ureg.kelvin)
@@ -457,15 +497,80 @@ class Reaction:
         return(component_rates)
 
 
+class ReactionInstance:
+    def __init__(self, reaction) -> None:
+        self.properties = reaction
+
+
+class ReactionList:
+    reactions = []
+    _list_created = False
+
+    # Class attributes and methods
+    def list_created() -> dict:
+        doc = """Has any instance of this list been made"""
+
+        def fget() -> bool:
+            return(ComponentList._list_created)
+
+        def fset(value) -> None:
+            value = bool(value)
+            if ComponentList.list_created and not value:
+                warnings.warn("Setting this variable to False after an "
+                              "instance has been created could cause "
+                              "compatibility issues with previously created "
+                              "instances", UserWarning)
+            ComponentList._list_created = value
+
+        return({'fget': fget, 'fset': fset, 'doc': doc})
+    list_created = property(**list_created())
+
+    def add_reaction(rxn: Reaction) -> None:
+        if rxn.name in ReactionList.get_reaction_names():
+            warnings.warn(f"Reaction {rxn.name} already exists, overriding")
+
+        elif ReactionList.list_created:
+            warnings.warn("Adding new reactions after a ReactionList "
+                          "instance has been created could cause "
+                          "compatibility issues with previously created "
+                          "instances", UserWarning)
+        ReactionList.reactions.append(rxn)
+
+    def get_reaction(name: str) -> Component:
+        for rxn in ReactionList.reactions:
+            if rxn.name == name:
+                return(rxn)
+        raise ValueError(f"Cannot find reaction {name}")
+
+    def get_reaction_names() -> list:
+        names = []
+        for rxn in ReactionList.reactions:
+            names.append(rxn.name)
+        return(names)
+
+    # Class instance attributes and methods
+    def __init__(self, exclude_list: list = []) -> None:
+        ReactionList.list_created = True
+        self._list_instance = dict()
+
+        # Create a dictionary for each reaction in the list
+        for obj in ReactionList.reactions:
+            if obj.name not in exclude_list:
+                self._list_instance[obj.name] = ReactionInstance(obj)
+
+    def __getitem__(self, key: str) -> Reaction:
+        try:
+            reaction = self._list_instance[key]
+        except KeyError:
+            raise KeyError(f"No reaction named {key} has been added")
+        return(reaction)
+
+
 def import_materials(directory: str = 'components/') -> None:
     for entry in os.scandir(directory):
         Component(entry)
 
 
 def import_reactions(directory: str = 'reactions/') -> dict:
-    reactions = {}
-    reaction_files = utils.import_yaml_folder(directory)
-    for entry in reaction_files:
-        reaction_object = Reaction(reaction_files[entry])
-        reactions[reaction_object.label] = reaction_object
-    return(reactions)
+    for entry in os.scandir(directory):
+        Reaction(entry)

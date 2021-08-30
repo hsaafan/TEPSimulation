@@ -4,12 +4,12 @@ Stoichiometry: [-1, -1, -1, 1]
 Rate Order: [1.1544, 0.3735, 1, 0]
 Phase: gas
 Enthalpy:
-  val: 0.03835554434
+  value: 0.03835554434
   units: cal / mol
 Arrhenius:
   A:
-    val: 2.367397e+16
+    value: 2.367397e+16
     units: mol / mmHg ** 2.5279 / hour
   Ea:
-    val: 40000
+    value: 40000
     units: cal / mol

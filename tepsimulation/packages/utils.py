@@ -116,55 +116,24 @@ def import_yaml_folder(directory: str = '/') -> dict:
     return(yaml_objects)
 
 
-def check_property_exists(dict_to_check: dict, property_struct: list) -> bool:
-    """
-    Uses the property_struct list to check that properties exist in
-    dict_to_check.
-    Examples:
-        props = {"prop_a": {"prop_c": 51, "units": "C"},
-                 "prop_b": {"prop_c": 25, "units": "C"}}
+def compare_dict_struct(first: dict, second: dict) -> bool:
+    if not isinstance(first, dict) or not isinstance(second, dict):
+        raise TypeError(f"Expected dict objects, got "
+                        f"{type(first)} and {type(second)}")
+    if first.keys() == second.keys():
+        # Check children
+        for key in first.keys():
+            first_is_dict = isinstance(first[key], dict)
+            second_is_dict = isinstance(second[key], dict)
 
-        check_property_exists(props, ["prop_b", "prop_c"]) -> True
-        check_property_exists(props, ["prop_a", "prop_b"]) -> False
-        check_property_exists(props, [["prop_a", "prop_b"], "prop_c"]) -> True
-        check_property_exists(props, ["*", "prop_c"]) -> True
-        check_property_exists(props, ["*", ["prop_c", "units"]]) -> True
-    """
-    # Check the first value in the list
-    first_key = property_struct[0]
-    if str(first_key) == "*":
-        # Wildcard to check all keys at that level
-        first_key = list(dict_to_check.keys())
-    elif type(first_key) != list:
-        # Treat individual values as list for more elegant code below
-        first_key = [first_key]
-
-    for key in first_key:
-        try:
-            if len(property_struct) == 1:
-                # Last level, just check keys exist
-                dict_to_check[key]
-            else:
-                # Go down one level, if any of these checks return false,
-                # cascade return false upwards
-                if not check_property_exists(dict_to_check[key],
-                                             property_struct[1:]):
-                    return(False)
-        except KeyError:
-            return(False)
-    return(True)
-
-
-def get_dict_structure(dictionary: dict, root: bool = True) -> list:
-    structure = []
-    for key, val in dictionary.items():
-        if type(val) is dict:
-            structure.append([key, get_dict_structure(val, False)])
-        elif root:
-            structure.append([key])
-        else:
-            structure.append(key)
-    return(structure)
+            if first_is_dict and second_is_dict:
+                return(compare_dict_struct(first[key], second[key]))
+            elif first_is_dict or second_is_dict:
+                # Only one is a dictionary
+                return False
+    else:
+        return False
+    return True
 
 
 def pint_check(value, expected_units, no_errors: bool = False) -> bool:

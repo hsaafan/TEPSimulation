@@ -60,26 +60,13 @@ class TestDictionaryUtils:
                  "prop_b": {"prop_c": 25, "units": "C"}}
         return(props)
 
-    @pytest.mark.parametrize('check',
-                             [
-                                ["prop_a"],
-                                ["prop_b", "prop_c"],
-                                [["prop_a", "prop_b"], "prop_c"],
-                                ["*", "prop_c"],
-                                ["*", ["prop_c", "units"]]
-                             ])
-    def test_property_exists(self, props, check):
-        assert utils.check_property_exists(props, check)
+    def test_dict_keys_equal(self, props):
+        assert utils.compare_dict_struct(props, props)
 
-    @pytest.mark.parametrize('check',
-                             [
-                                ["not_a_prop"],
-                                ["not_a_prop", "prop_c"],
-                                ["*", ["prop_c", "units", "not_a_prop"]],
-                                ["*", ["prop_c", "units", "special_prop"]]
-                             ])
-    def test_property_does_not_exist(self, props, check):
-        assert not utils.check_property_exists(props, check)
+    def test_dict_keys_not_equal(self, props):
+        not_props = {"prop_c": {"prop_a": 51, "units": "C", "special_prop": 1},
+                     "prop_c": {"prop_b": 25, "units": "C"}}
+        assert not utils.compare_dict_struct(props, not_props)
 
     def test_change_keys_to_lowercase(self):
         mixed = {
