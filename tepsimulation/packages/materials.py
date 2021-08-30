@@ -65,7 +65,7 @@ component_structure = utils.get_dict_structure(component_properties)
 
 
 class Component:
-    def __init__(self, path: str):
+    def __init__(self, path: str) -> None:
         self._properties = None
         self.name = None
         self.id = None
@@ -73,7 +73,7 @@ class Component:
         self._vaporization_heat = None
         self.load_file(path)
 
-    def load_file(self, path: str):
+    def load_file(self, path: str) -> None:
         yaml_dict = utils.import_yaml(path)
         for prop in component_structure:
             valid = utils.check_property_exists(yaml_dict, prop)
@@ -85,7 +85,7 @@ class Component:
         self._set_properties()
         ComponentList.add_component(self)
 
-    def _set_properties(self):
+    def _set_properties(self) -> None:
         self.name = self._properties["name"]
         self.id = self.name  # alias
 
@@ -99,23 +99,23 @@ class Component:
         units = self._properties["vaporization heat"]["units"]
         self.vaporization_heat = pint.Quantity(value, units)
 
-    def molar_mass():
+    def molar_mass() -> dict:
         doc = """Molar mass of component"""
 
-        def fget(self):
+        def fget(self) -> pint.Quantity:
             return(self._molar_mass)
 
-        def fset(self, value):
+        def fset(self, value) -> None:
             if utils.pint_check(value, '[mass] / [substance]'):
                 self._molar_mass = value
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     molar_mass = property(**molar_mass())
 
-    def vaporization_heat():
+    def vaporization_heat() -> dict:
         doc = """Vaporization heat of component"""
 
-        def fget(self):
+        def fget(self) -> pint.Quantity:
             return(self._vaporization_heat)
 
         def fset(self, value):
@@ -125,7 +125,7 @@ class Component:
         return({'fget': fget, 'fset': fset, 'doc': doc})
     vaporization_heat = property(**vaporization_heat())
 
-    def vapor_pressure(self, temperature: pint.Quantity):
+    def vapor_pressure(self, temperature: pint.Quantity) -> pint.Quantity:
         """ Vapor Pressure as calculated by Antoine's equation """
         model = self._properties["antoines"]
         T_units = model["temperature units"]
@@ -140,7 +140,7 @@ class Component:
         p_vap = ureg(P_units) * base ** (A + B / (C + T))
         return(p_vap)
 
-    def liquid_density(self, temperature: pint.Quantity):
+    def liquid_density(self, temperature: pint.Quantity) -> pint.Quantity:
         """ Liquid Density as calculated from a polynomial model """
         model = self._properties["liquid density"]
         T_units = model["temperature units"]
@@ -154,7 +154,8 @@ class Component:
         rho_l = ureg(rho_units) * (A + (B + C * T) * T)
         return(rho_l)
 
-    def liquid_specific_enthalpy(self, temperature: pint.Quantity):
+    def liquid_specific_enthalpy(self,
+                                 temperature: pint.Quantity) -> pint.Quantity:
         """ Liquid Specific Enthalpy as calculated from a polynomial model """
         h_model = self._properties["liquid specific enthalpy"]
         T_units = h_model["temperature units"]
@@ -171,7 +172,8 @@ class Component:
         H += h_vap
         return(H)
 
-    def gas_specific_enthalpy(self, temperature: pint.Quantity):
+    def gas_specific_enthalpy(self,
+                              temperature: pint.Quantity) -> pint.Quantity:
         """ Gas Specific Enthalpy as calculated from a polynomial model """
         h_model = self._properties["gas specific enthalpy"]
         T_units = h_model["temperature units"]
@@ -188,7 +190,9 @@ class Component:
         H += h_vap
         return(H)
 
-    def liquid_specific_enthalpy_change(self, temperature: pint.Quantity):
+    def liquid_specific_enthalpy_change(self,
+                                        temperature:
+                                        pint.Quantity) -> pint.Quantity:
         """
         Liquid Specific Enthalpy Change as
         calculated from a polynomial model
@@ -206,7 +210,8 @@ class Component:
         dH = ureg(h_units) * (A + (B + C * T) * T)
         return(dH)
 
-    def gas_specific_enthalpy_change(self, temperature: pint.Quantity):
+    def gas_specific_enthalpy_change(self, temperature:
+                                     pint.Quantity) -> pint.Quantity:
         """
         Gas Specific Enthalpy Change as
         calculated from a polynomial model
@@ -225,91 +230,165 @@ class Component:
         return(dH)
 
 
+class ComponentInstance:
+    def __init__(self, component, flowrate=False) -> None:
+        self.properties = component
+        if flowrate:
+            self.mass = pint.Quantity("0 kg/hour")
+        else:
+            self.mass = pint.Quantity("0 kg")
+
+    def moles() -> dict:
+        doc = """Amount or rate of moles"""
+
+        def fget(self) -> pint.Quantity:
+            return(self.mass / self.properties.molar_mass)
+
+        def fset(self, value) -> None:
+            self.mass = value * self.properties.molar_mass
+
+        return({'fget': fget, 'fset': fset, 'doc': doc})
+    moles = property(**moles())
+
+
 class ComponentList:
     components = []
-    list_created = False
+    _list_created = False
 
-    def __init__(self):
-        ComponentList.list_created = True
-        self._list_instance = dict()
+    # Class attributes and methods
+    def list_created() -> dict:
+        doc = """Has any instance of this list been made"""
 
-        # Create a dictionary for each component in the list
-        for obj in ComponentList.components:
-            name = obj.name
-            self._list_instance[name] = dict()
+        def fget() -> bool:
+            return(ComponentList._list_created)
 
-            self._list_instance[name]["object"] = obj
-            self._list_instance[name]["mass"] = 0
+        def fset(value) -> None:
+            value = bool(value)
+            if ComponentList.list_created and not value:
+                warnings.warn("Setting this variable to False after an "
+                              "instance has been created could cause "
+                              "compatibility issues with previously created "
+                              "instances", UserWarning)
+            ComponentList._list_created = value
 
-    def add_component(comp: Component):
+        return({'fget': fget, 'fset': fset, 'doc': doc})
+    list_created = property(**list_created())
+
+    def add_component(comp: Component) -> None:
         if comp.name in ComponentList.get_component_names():
             warnings.warn(f"Component {comp.name} already exists, overriding")
 
         elif ComponentList.list_created:
-            raise RuntimeError("Cannot add new components once a "
-                               "component list has been created")
+            warnings.warn("Adding new components after a ComponentList "
+                          "instance has been created could cause "
+                          "compatibility issues with previously created "
+                          "instances", UserWarning)
         ComponentList.components.append(comp)
 
-    def get_component(name: str):
+    def get_component(name: str) -> Component:
         for comp in ComponentList.components:
             if comp.name == name:
                 return(comp)
         raise ValueError(f"Cannot find component {name}")
 
-    def get_component_names():
+    def get_component_names() -> list:
         names = []
         for comp in ComponentList.components:
             names.append(comp.name)
         return(names)
 
-    def fractions(frac_type: str):
-        doc = """ Mass/mole fraction dictionary """
+    # Class instance attributes and methods
+    def __init__(self, flowrate=False) -> None:
+        ComponentList.list_created = True
+        self._list_instance = dict()
 
-        def fget(self):
+        # Create a dictionary for each component in the list
+        for obj in ComponentList.components:
+            self._list_instance[obj.name] = ComponentInstance(obj, flowrate)
+
+    def __getitem__(self, key: str) -> Component:
+        try:
+            component = self._list_instance[key]
+        except KeyError:
+            raise KeyError(f"No component called {key} has been added")
+        return(component)
+
+    def __setitem__(self, key, new_value: pint.Quantity) -> None:
+        self[key]  # Attempt to acess the component to check if it exists
+
+        is_mass = utils.pint_check(new_value, "[mass]", no_errors=True)
+        is_mole = utils.pint_check(new_value, "[substance]", no_errors=True)
+        is_mass_rate = utils.pint_check(new_value, "[mass] / [time]",
+                                        no_errors=True)
+        is_mole_rate = utils.pint_check(new_value, "[substance] / [time]",
+                                        no_errors=True)
+
+        # We check consistency with masses since we store masses and convert
+        # to moles when they are requested
+        if is_mass or is_mole:
+            # Quantity
+            self._check_unit_consistency("[mass]")
+        elif is_mass_rate or is_mole_rate:
+            # Flowrate
+            self._check_unit_consistency("[mass] / [time]")
+        else:
+            raise TypeError(f"Units must be of dimensionality: "
+                            f"[mass], [mass] / [time], "
+                            f"[substance], or [substance] / [time]")
+
+        if is_mole or is_mole_rate:
+            new_value = new_value * self[key].properties.molar_mass
+        self[key].mass = new_value
+
+    def _check_unit_consistency(self, exp_units) -> bool:
+        """
+        Checks if the stored units are all of one dimensionality, normally to
+        distinguish between quantities and flow rates
+        """
+        for obj in self._list_instance:
+            if not utils.pint_check(obj["mass"], exp_units, no_errors=True):
+                return(False)
+        return(True)
+
+    def fractions(frac_type: str) -> dict:
+        doc = """
+              Mass/mole fraction dictionary
+
+              To set, pass an ordered collection where the first value is
+              the total mass, mass flowrate, moles, or mole flowrate, and the
+              second value is a dictionary where keys correspond to the
+              components and the values are their mole/mass fraction.
+              """
+
+        def fget(self) -> dict:
             fractions = dict()
+
+            total = 0
+            for comp in self._list_instance:
+                if frac_type == "mass":
+                    total += comp.mass
+                elif frac_type == "mole":
+                    total += comp.moles
+
             for name, comp in self._list_instance.items():
-                frac = comp[frac_type + " fraction"]
-                fractions[name] = frac
+                if frac_type == "mass":
+                    fractions[name] = comp.mass / total
+                elif frac_type == "mole":
+                    fractions[name] = comp.moles / total
             return(fractions)
 
-        def fset(self, fractions: dict):
-            for name, frac in fractions.items():
-                if name not in ComponentList.get_component_names():
-                    raise KeyError(f"Cannot set fraction for {name} "
-                                   f"beacuse it cannot be found")
-                elif not isinstance(frac, (float, int)):
-                    raise TypeError("Fraction must be a number")
-                elif frac < 0:
-                    raise ValueError("Fraction cannot be negative")
-                self._list_instance[name][frac_type + " fraction"] = frac
+        def fset(self, collection) -> None:
+            try:
+                total = collection[0]
+                fractions = collection[1]
+            except IndexError:
+                raise TypeError(f"Invalid {frac_type} fraction passed")
 
-            # Check total fraction is equal to 1
-            total_frac = 0
-            new_fractions = fget(self)
-            for name, frac in new_fractions.items():
-                total_frac += frac
-            if abs(total_frac - 1) > utils.tolerance:
-                raise ValueError("Total fraction cannot exceed 1")
-
-            # Update the other fraction type
-            basis = 100
-            total = 0
-            other_fracs = dict()
-            for name, frac in new_fractions.items():
-                mw = ComponentList.get_component(name).get_molar_mass()
-                mw = mw.to('g / mol').magnitude
-                if frac_type == 'mass':
-                    val = (frac * basis) / mw
-                elif frac_type == 'mole':
-                    val = (frac * basis) * mw
-                other_fracs[name] = val
-                total += val
-            for name, frac in other_fracs.items():
-                new_val = other_fracs[name] / total
-                if frac_type == 'mass':
-                    self._list_instance[name]["mole fraction"] = new_val
-                elif frac_type == 'mole':
-                    self._list_instance[name]["mass fraction"] = new_val
+            for name, frac in fractions:
+                if frac_type == "mass":
+                    self[name].mass = frac * total
+                elif frac_type == "mole":
+                    self[name].moles = frac * total
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     mass_fractions = property(**fractions("mass"))
@@ -317,21 +396,11 @@ class ComponentList:
 
 
 class Reaction:
-    label = None
-    components = None
-    stoich = None
-    order = None
-    rate_parameters = {
-        "A": None,
-        "Ea": None
-    }
-    phase = None
-    enthalpy = None
-
-    def __init__(self, reaction_dict: dict):
+    # TODO add registry like components and standardize import functions
+    def __init__(self, reaction_dict: dict) -> None:
         self.import_dict(reaction_dict)
 
-    def import_dict(self, reaction_dict: dict):
+    def import_dict(self, reaction_dict: dict) -> None:
         # Reaction Stoichiometry
         self.label = reaction_dict["name"]
         self.components = reaction_dict["components"]
@@ -357,14 +426,15 @@ class Reaction:
         H = reaction_dict["enthalpy"]
         self.enthalpy = Unit(H["val"], H["units"])
 
-    def arrhenius(self, temperature: Unit):
+    def arrhenius(self, temperature: pint.Quantity) -> pint.Quantity:
         T = temperature.to(ureg.kelvin)
         A = self.rate_parameters["A"]
         Ea = self.rate_parameters["Ea"]
         k = A * math.exp(-Ea / Rg / T)
         return(k)
 
-    def get_rxn_rate(self, temperature: Unit, components: list):
+    def get_rxn_rate(self, temperature: pint.Quantity,
+                     components: list) -> pint.Quantity:
         if len(components) != len(self.components):
             raise IndexError(f"Expected {len(self.components)} values, "
                              f"recieved {len(components)}")
@@ -378,7 +448,8 @@ class Reaction:
             rr *= components[i] ** self.order[i]
         return(rr)
 
-    def get_component_rxn_rates(self, temperature: Unit, components: list):
+    def get_component_rxn_rates(self, temperature: pint.Quantity,
+                                components: list) -> dict:
         rr = self.get_rxn_rate(temperature, components)
         component_rates = {}
         for key, val in enumerate(self.components):
@@ -386,12 +457,12 @@ class Reaction:
         return(component_rates)
 
 
-def import_materials(directory: str = 'components/'):
+def import_materials(directory: str = 'components/') -> None:
     for entry in os.scandir(directory):
         Component(entry)
 
 
-def import_reactions(directory: str = 'reactions/'):
+def import_reactions(directory: str = 'reactions/') -> dict:
     reactions = {}
     reaction_files = utils.import_yaml_folder(directory)
     for entry in reaction_files:

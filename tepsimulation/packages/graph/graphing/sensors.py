@@ -33,7 +33,7 @@ class Sensor:
     poll
         Get the current sensor value with measurment noise
     """
-    def __init__(self, id: str):
+    def __init__(self, id: str) -> None:
         self.id = id
         self._flowsheet = None
         self.target = []
@@ -43,7 +43,8 @@ class Sensor:
         self._sensor_offset = None
         self._sensor_stdv = None
 
-    def _sensor_value_check(self, value, prop_name):
+    def _sensor_value_check(self, value: pint.Quantity,
+                            prop_name: str) -> None:
         if not isinstance(value, pint.Quantity):
             warnings.warn(f"{prop_name} for {self.id} has been set without "
                           f"any units, this may cause unexpected behaviour")
@@ -53,46 +54,48 @@ class Sensor:
             warnings.warn(f"Could not check {prop_name} of {self.id} matches "
                           f"polled sensor units")
 
-    def flowsheet():
+    def flowsheet() -> dict:
         doc = """The flowsheet object the sensor hooks into"""
 
         def fget(self):
+            # Returns Flowsheet object
             return(self._flowsheet)
 
-        def fset(self, value):
+        def fset(self, value) -> None:
+            # value must be a Flowsheet object
             self._flowsheet = value
             self.is_attached = True
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     flowsheet = property(**flowsheet())
 
-    def sensor_offset():
+    def sensor_offset() -> dict:
         doc = """Constant offset added to the value that the sensor polls"""
 
-        def fget(self):
+        def fget(self) -> pint.Quantity:
             return(self._sensor_offset)
 
-        def fset(self, value):
+        def fset(self, value) -> None:
             self._sensor_value_check(value, "sensor offset")
             self._sensor_offset = value
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     sensor_offset = property(**sensor_offset())
 
-    def sensor_stdv():
+    def sensor_stdv() -> dict:
         doc = """Used to return the polled value with gaussian noise"""
 
-        def fget(self):
+        def fget(self) -> pint.Quantity:
             return(self._sensor_stdv)
 
-        def fset(self, value):
+        def fset(self, value: pint.Quantity) -> None:
             self._sensor_value_check(value, "sensor standard deviation")
             self._sensor_stdv = value
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     sensor_stdv = property(**sensor_stdv())
 
-    def hook(self, target: list):
+    def hook(self, target: list) -> None:
         if not self.is_attached:
             raise RuntimeError(f"Cannot hook sensor {self.id}, sensor has not "
                                f"been attached to a FlowSheet")
@@ -111,7 +114,7 @@ class Sensor:
             warnings.warn(f"Cannot hook into {id} of {target}, check that "
                           f"this attribute or key exists", SyntaxWarning)
 
-    def poll(self):
+    def poll(self) -> pint.Quantity:
         if not (self.is_attached and self.is_hooked):
             return(None)
 

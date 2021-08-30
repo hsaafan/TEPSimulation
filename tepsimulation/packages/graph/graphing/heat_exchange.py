@@ -10,7 +10,7 @@ class VesselJacket(base.UnitOperation):
                  inlet: streams.MaterialStream,
                  outlet: streams.MaterialStream,
                  heat_in: streams.EnergyStream,
-                 heat_out: streams.EnergyStream):
+                 heat_out: streams.EnergyStream) -> None:
         super().__init__(id)
         self.add_inlet(inlet, "fluid")
         self.add_outlet(outlet, "fluid")
@@ -40,7 +40,7 @@ class HeatExchanger(base.UnitOperation):
                  thermal_outlet: streams.MaterialStream,
                  process_inlet: streams.MaterialStream,
                  process_outlet: streams.MaterialStream,
-                 thermal_volume: pint.Quantity):
+                 thermal_volume: pint.Quantity) -> None:
         self.add_inlet(thermal_inlet, "thermal")
         self.add_outlet(thermal_outlet, "thermal")
 
@@ -50,13 +50,13 @@ class HeatExchanger(base.UnitOperation):
         if base.pint_check(thermal_volume, '[volume]'):
             self.thermal_volume = thermal_volume
 
-    def get_overall_heat_transfer_coefficient(self):
+    def get_overall_heat_transfer_coefficient(self) -> pint.Quantity:
         # FIXME Currently have the stripper condenser values here, need to
         # figure out what they actually refer to
         U = 0.404655 * (1 - 1 / (1 + (self.outlets["process"].flowrate)**4))
         return(U)
 
-    def get_thermal_heat_duty(self):
+    def get_thermal_heat_duty(self) -> pint.Quantity:
         # Calculate heat provided by thermal fluid
         tin = self.inlets["thermal"]
         tout = self.outlets["thermal"]
@@ -66,7 +66,9 @@ class HeatExchanger(base.UnitOperation):
         heat_duty = mass_flowrate * specific_heat_capacity * temp_diff
         return(heat_duty)
 
-    def get_process_heat_duty(self, overall_heat_transfer_coefficient):
+    def get_process_heat_duty(self,
+                              overall_heat_transfer_coefficient:
+                              pint.Quantity) -> pint.Quantity:
         # Calculate heat consumed by process fluid
         tout = self.outlets["thermal"]
         pout = self.outlets["process"]
@@ -77,8 +79,9 @@ class HeatExchanger(base.UnitOperation):
         return(heat_duty)
 
     def get_thermal_temperature_change(self,
-                                       thermal_heat_duty,
-                                       process_heat_duty):
+                                       thermal_heat_duty: pint.Quantity,
+                                       process_heat_duty:
+                                       pint.Quantity) -> pint.Quantity:
         # Calculate heat capacity of thermal fluid
         tin = self.inlets["thermal"]
 
@@ -87,7 +90,8 @@ class HeatExchanger(base.UnitOperation):
         change = (thermal_heat_duty - process_heat_duty) / heat_capacity
         return(change)
 
-    def update_thermal_outlet_temperature(self, time_step: pint.Quantity):
+    def update_thermal_outlet_temperature(self,
+                                          time_step: pint.Quantity) -> None:
         tout = self.outlets["thermal"]
 
         U = self.get_overall_heat_transfer_coefficient()
@@ -97,5 +101,5 @@ class HeatExchanger(base.UnitOperation):
 
         tout.temperature += time_step * delT
 
-    def step_events(self, time_step: pint.Quantity):
+    def step_events(self, time_step: pint.Quantity) -> None:
         self.update_thermal_outlet_temperature(time_step)

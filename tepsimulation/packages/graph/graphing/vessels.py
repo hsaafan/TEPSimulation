@@ -5,13 +5,13 @@ from ... import utils
 
 
 class Vessel(base.UnitOperation):
-    def __init__(self, id: str):
+    def __init__(self, id: str) -> None:
         super().__init__(id)
 
-    def volume():
+    def volume() -> dict:
         doc = """ Vessel volume """
 
-        def fget(self):
+        def fget(self) -> pint.quantity:
             """ Calculates and returns the vessel volume. """
             if self._height is None or self._diameter is None:
                 raise RuntimeError("Vessel dimensions haven't been set")
@@ -19,14 +19,16 @@ class Vessel(base.UnitOperation):
             d = self._diameter
             return(h * (3.14 / 4) * d ** 2)
 
-        def fset(self, value):
+        def fset(self, value) -> None:
             raise RuntimeError("Volume can't be set manually, use "
                                "set_dimensions method instead")
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     volume = property(**volume())
 
-    def set_dimensions(self, diameter: pint.Quantity, height: pint.Quantity):
+    def set_dimensions(self,
+                       diameter: pint.Quantity,
+                       height: pint.Quantity) -> None:
         if diameter <= 0 or height <= 0:
             raise ValueError("Negative lengths")
 
@@ -38,17 +40,17 @@ class Vessel(base.UnitOperation):
 
 
 class Reactor(Vessel):
-    def __init__(self, id: str):
+    def __init__(self, id: str) -> None:
         super().__init__(id)
         raise NotImplementedError
 
-    def add_reaction(self):
+    def add_reaction(self) -> None:
         pass
 
-    def _process_reactions(self):
+    def _process_reactions(self) -> None:
         pass
 
-    def step_events(self, time_step: pint.Quantity):
+    def step_events(self, time_step: pint.Quantity) -> None:
         # Update inlets
         for stream in self.inlets:
             pass

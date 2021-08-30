@@ -40,11 +40,11 @@ class Split(base.UnitOperation):
     _position = 0
     vrange = 0
 
-    def __init__(self, id: str):
+    def __init__(self, id: str) -> None:
         super().__init__(id)
         raise NotImplementedError
 
-    def position():
+    def position() -> dict:
         doc = """Position of valve.
 
               Position has range of [0,100] with 0 indicating flow favoring
@@ -53,11 +53,11 @@ class Split(base.UnitOperation):
               outlet.
               """
 
-        def fget(self):
+        def fget(self) -> float:
             """Returns the valve position."""
             return(self._position)
 
-        def fset(self, value: float):
+        def fset(self, value: float) -> None:
             """Sets the valve position."""
             if not isinstance(value, (int, float)):
                 raise TypeError("Expected a numeric valve position")
@@ -86,12 +86,12 @@ class Join(base.UnitOperation):
 
     """
 
-    def __init__(self, id: str):
+    def __init__(self, id: str) -> None:
         super().__init__(id)
         raise NotImplementedError
 
 
 class Compressor(base.UnitOperation):
-    def __init__(self, id: str):
+    def __init__(self, id: str) -> None:
         super().__init__(id)
         raise NotImplementedError

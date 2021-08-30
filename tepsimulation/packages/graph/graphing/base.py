@@ -35,31 +35,31 @@ class FlowSheetObject:
         User set label for identifying object
     """
 
-    def __init__(self, id: str):
+    def __init__(self, id: str) -> None:
         self.id = id
         self._temperature = None
         self._pressure = None
 
-    def temperature():
+    def temperature() -> dict:
         doc = """Current temperature"""
 
-        def fget(self):
+        def fget(self) -> pint.Quantity:
             return(self._temperature)
 
-        def fset(self, value):
+        def fset(self, value: pint.Quantity) -> None:
             if utils.pint_check(value, '[temperature]'):
                 self._temperature = value
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     temperature = property(**temperature())
 
-    def pressure():
+    def pressure() -> dict:
         doc = """Current pressure"""
 
-        def fget(self):
+        def fget(self) -> pint.Quantity:
             return(self._pressure)
 
-        def fset(self, value):
+        def fset(self, value: pint.Quantity) -> None:
             if utils.pint_check(value, '[pressure]'):
                 self._pressure = value
 
@@ -85,49 +85,49 @@ class Stream(FlowSheetObject):
         The outlet of the stream
     """
 
-    def __init__(self, id: str):
+    def __init__(self, id: str) -> None:
         super().__init__(id)
 
-    def __str__(self):
+    def __str__(self) -> str:
         try:
             str_repr = f"{self.id}: {self._source.id} ----> {self._sink.id}"
         except AttributeError:
             str_repr = f"{self.id}: Broken connection"
         return(str_repr)
 
-    def pressure():
+    def pressure() -> dict:
         doc = """Pressure difference of source and sink"""
 
-        def fget(self):
+        def fget(self) -> pint.Quantity:
             pressure_diff = self.sink.pressure - self.source.pressure
             return(pressure_diff)
 
-        def fset(self, value):
+        def fset(self, value) -> None:
             raise AttributeError(f"Attempted to set pressure of stream "
                                  f"{self.id}")
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     pressure = property(**pressure())
 
-    def source():
+    def source() -> dict:
         doc = """Where the stream starts"""
 
-        def fget(self):
+        def fget(self) -> FlowSheetObject:
             return(self._source)
 
-        def fset(self, node):
+        def fset(self, node: FlowSheetObject) -> None:
             self._source = node
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
     source = property(**source())
 
-    def sink():
+    def sink() -> dict:
         doc = """Where the stream ends"""
 
-        def fget(self):
+        def fget(self) -> FlowSheetObject:
             return(self._sink)
 
-        def fset(self, node):
+        def fset(self, node: FlowSheetObject) -> None:
             self._sink = node
 
         return({'fget': fget, 'fset': fset, 'doc': doc})
@@ -169,14 +169,14 @@ class UnitOperation(FlowSheetObject):
         in step_events instead but this is provided as a way of keeping the
         code clean
     """
-    def __init__(self, id: str):
+    def __init__(self, id: str) -> None:
         super().__init__(id)
         self.outlets = dict()
         self.inlets = dict()
         self._temperature = None
         self._pressure = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         incoming = []
         outgoing = []
 
@@ -188,28 +188,28 @@ class UnitOperation(FlowSheetObject):
 
         return(f'{incoming} ---> {self.id} ---> {outgoing}')
 
-    def add_inlet(self, stream: Stream, inlet_id: str = "inlet"):
+    def add_inlet(self, stream: Stream, inlet_id: str = "inlet") -> None:
         if inlet_id in self.inlets.keys():
             warnings.warn(f"{stream.id} is overwriting an inlet of {self.id}")
         self.inlets[inlet_id] = stream
         stream.sink = self
 
-    def add_outlet(self, stream: Stream, outlet_id: str = "outlet"):
+    def add_outlet(self, stream: Stream, outlet_id: str = "outlet") -> None:
         if outlet_id in self.inlets.keys():
             warnings.warn(f"{stream.id} is overwriting an outlet of {self.id}")
         self.outlets[outlet_id] = stream
         stream.source = self
 
-    def step_preprocess(self, time_step: pint.Quantity):
+    def step_preprocess(self, time_step: pint.Quantity) -> None:
         utils.pint_check(time_step, '[time]')
 
-    def step_events(self, time_step: pint.Quantity):
+    def step_events(self, time_step: pint.Quantity) -> None:
         raise NotImplementedError
 
-    def step_postprocess(self):
+    def step_postprocess(self) -> None:
         pass
 
-    def step(self, time_step: pint.Quantity):
+    def step(self, time_step: pint.Quantity) -> None:
         self.step_preprocess(time_step)
         self.step_events(time_step)
         self.step_postprocess()
@@ -226,13 +226,13 @@ class Inlet(UnitOperation):
         Overrides parent method and raises an error
     """
 
-    def __str__(self):
+    def __str__(self) -> str:
         outgoing = []
         for stream in self.outlets:
             outgoing.append(stream.sink.id)
         return(f'{self.id} ---> {outgoing}')
 
-    def add_inlet(self, stream: Stream, inlet_id: str = ""):
+    def add_inlet(self, stream: Stream, inlet_id: str = "") -> None:
         raise RuntimeError("Cannot add inlet streams to flowsheet inlets")
 
 
@@ -247,11 +247,11 @@ class Outlet(UnitOperation):
         Overrides parent method and raises an error
     """
 
-    def __str__(self):
+    def __str__(self) -> str:
         incoming = []
         for stream in self.inlets:
             incoming.append(stream.source.id)
         return(f'{incoming} ---> {self.id}')
 
-    def add_outlet(self, stream: Stream, outlet_id: str = ""):
+    def add_outlet(self, stream: Stream, outlet_id: str = "") -> None:
         raise RuntimeError("Cannot add outlet streams to flowsheet outlets")

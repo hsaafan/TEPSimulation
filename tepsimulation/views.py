@@ -34,20 +34,20 @@ class View:
     open_github
         Opens a link to the programs GitHubs
     """
-    def connect_controller(self, controller):
+    def connect_controller(self, controller) -> None:
         self._controller = controller
 
     # Dummy methods
-    def start(self):
+    def start(self) -> None:
         raise RuntimeError("No view has been selected, cannot start")
 
-    def reset_view(self):
-        pass
+    def reset_view(self) -> None:
+        raise RuntimeError("No view has been selected, cannot reset")
 
-    def update_progress(self, percent_done):
+    def update_progress(self, percent_done) -> None:
         raise RuntimeError("No progress bar is available in this view")
 
-    def show_copyright_information(self):
+    def show_copyright_information(self) -> str:
         info = ""
         info += "Tennessee Eastman Process Simulation\n"
         info += "Copyright (c) 2021 Hussein Saafan\n"
@@ -55,10 +55,10 @@ class View:
         info += "A copy of this license is bundled with this software"
         return(info)
 
-    def open_github(self):
+    def open_github(self) -> str:
         return("https://github.com/hsaafan/TEPSimulation")
 
-    def output_to_console(self, text: str):
+    def output_to_console(self, text: str) -> None:
         raise RuntimeError("No console available to output to")
 
 
@@ -67,11 +67,11 @@ class CLIView(View):
 
     See the View class documentation for information on methods and attributes
     """
-    def start(self):
+    def start(self) -> None:
         # CHECK Is anything needed here?
-        return
+        self.show_copyright_information()
 
-    def update_progress(self, percent_done: float):
+    def update_progress(self, percent_done: float) -> None:
         """ Displays a progress bar in the command line """
         bar_length = 40
         fill_length = int(percent_done * bar_length // 100)
@@ -81,13 +81,13 @@ class CLIView(View):
         if percent_done >= 100:
             print()
 
-    def show_copyright_information(self):
+    def show_copyright_information(self) -> None:
         print(super().show_copyright_information())
 
-    def open_github(self):
+    def open_github(self) -> None:
         print(super().open_github())
 
-    def output_to_console(self, text: str):
+    def output_to_console(self, text: str) -> None:
         print(text)
 
 
@@ -96,13 +96,13 @@ class GUIView(View):
 
     See the View class documentation for information on methods and attributes
     """
-    def __init__(self):
+    def __init__(self) -> None:
         """ Create the Qt windows """
         self._app = qtw.QApplication(sys.argv)
         self._main_window = windows.MainWindow()
         self._about_dialog = windows.AboutDialog()
 
-    def _connect_inputs(self):
+    def _connect_inputs(self) -> None:
         """ Connects Qt widgets to controller """
         # Menubar
         help_about = self._main_window.ui.help_about
@@ -127,12 +127,12 @@ class GUIView(View):
         run_button.clicked.connect(self._controller.run)
         stop_button.clicked.connect(self._controller.stop)
 
-    def start(self):
+    def start(self) -> None:
         self._connect_inputs()
         self._main_window.show()
         sys.exit(self._app.exec_())
 
-    def reset_view(self):
+    def reset_view(self) -> None:
         """ Resets the progress bar and start/stop buttons """
         if self._main_window.ui.run_button.isHidden():
             self._main_window.ui.run_button.show()
@@ -142,16 +142,16 @@ class GUIView(View):
             self._main_window.ui.stop_button.show()
         self.update_progress(0)
 
-    def show_copyright_information(self):
+    def show_copyright_information(self) -> None:
         self._about_dialog.show()
 
-    def open_github(self):
+    def open_github(self) -> None:
         url = super().open_github()
         QDesktopServices.openUrl(qtc.QUrl(url))
 
-    def update_progress(self, percent_done):
+    def update_progress(self, percent_done) -> None:
         bar = self._main_window.ui.progress_bar
         bar.setValue(ceil(percent_done))
 
-    def output_to_console(self, text: str):
+    def output_to_console(self, text: str) -> None:
         self._main_window.ui.console_output.appendPlainText(text)

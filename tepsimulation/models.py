@@ -42,19 +42,19 @@ class Model:
     step_model
         Move the model one step forward
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self._console_buffer = ""
         self.is_running = False
 
     # Properties
-    def settings_directory():
+    def settings_directory() -> dict:
         doc = """Directory of settings files"""
 
-        def fget(self):
+        def fget(self) -> str:
             """Returns the directory path."""
             return(f"{self._settings_directory}")
 
-        def fset(self, directory: str):
+        def fset(self, directory: str) -> None:
             """Sets the path to the settings directory."""
             if directory is None:
                 self._settings_directory = getcwd() + "/settings/"
@@ -71,14 +71,14 @@ class Model:
         return({'fget': fget, 'fset': fset, 'doc': doc})
     settings_directory = property(**settings_directory())
 
-    def simulation_time():
+    def simulation_time() -> dict:
         doc = """Total time to simulate"""
 
-        def fget(self):
+        def fget(self) -> float:
             """Returns the simulation time."""
             return(self._simulation_time)
 
-        def fset(self, value: float):
+        def fset(self, value: float) -> None:
             """Sets the total simulation time."""
             if not isinstance(value, (int, float)):
                 raise TypeError(f"Expected a float type time, "
@@ -100,14 +100,14 @@ class Model:
         return({'fget': fget, 'fset': fset, 'doc': doc})
     simulation_time = property(**simulation_time())
 
-    def time_step():
+    def time_step() -> dict:
         doc = """Time step to use in the simulation"""
 
-        def fget(self):
+        def fget(self) -> float:
             """Returns the time step."""
             return(self._time_step)
 
-        def fset(self, value: float):
+        def fset(self, value: float) -> None:
             """Sets the time step."""
             if not isinstance(value, (int, float)):
                 raise TypeError(f"Expected a float type time step, "
@@ -128,14 +128,14 @@ class Model:
         return({'fget': fget, 'fset': fset, 'doc': doc})
     time_step = property(**time_step())
 
-    def total_step_count():
+    def total_step_count() -> dict:
         doc = """Time step to use in the simulation"""
 
-        def fget(self):
+        def fget(self) -> int:
             """Returns the time step."""
             return(self._total_step_count)
 
-        def fset(self):
+        def fset(self) -> None:
             raise RuntimeError("Step count should not be set manually, it "
                                "is set automatically when setting the "
                                "simulation time and time step")
@@ -144,16 +144,16 @@ class Model:
     total_step_count = property(**total_step_count())
 
     # Private methods
-    def _check_stop(self):
+    def _check_stop(self) -> None:
         if self._current_step >= self._total_step_count:
             self.append_console_buffer("Simulation has finished")
             self.is_running = False
 
     # Setup methods
-    def connect_controller(self, controller):
+    def connect_controller(self, controller) -> None:
         self._controller = controller
 
-    def import_settings(self):
+    def import_settings(self) -> None:
         """ Loads settings files from the disk """
         mat_dir = self._settings_directory + "components/"
         rxn_dir = self._settings_directory + "reactions/"
@@ -165,19 +165,19 @@ class Model:
         self._flowsheet = flowsheet.FlowSheet()
 
     # Runtime methods
-    def append_console_buffer(self, text: str):
+    def append_console_buffer(self, text: str) -> None:
         self._console_buffer += text
 
-    def output_console_buffer(self):
+    def output_console_buffer(self) -> None:
         if self._console_buffer != "":
             self._controller.output_to_console(self._console_buffer)
             self._console_buffer = ""
 
-    def reset_model(self):
+    def reset_model(self) -> None:
         self._current_step = 0
         self.is_running = False
 
-    def run(self, process_gui: bool = False):
+    def run(self, process_gui: bool = False) -> None:
         self.is_running = True
         while self.is_running:
             if process_gui:
@@ -188,10 +188,10 @@ class Model:
             self.output_console_buffer()
         self._controller.reset()
 
-    def force_stop(self):
+    def force_stop(self) -> None:
         self.is_running = False
 
-    def step_model(self):
+    def step_model(self) -> None:
         self._flowsheet.step(self._time_step)
         # FIXME
         # measurements = self._flowsheet.poll_sensors()

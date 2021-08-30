@@ -1,12 +1,14 @@
 import pytest
 import os
+import warnings
 
 import pint
 
 from ..packages import materials
 
 
-@pytest.mark.filterwarnings("ignore:Component simple material:UserWarning")
+@pytest.mark.filterwarnings("ignore:Component simple material:UserWarning",
+                            "ignore:Adding new components:UserWarning")
 class TestMaterials:
     @pytest.fixture
     def simple_material(self):
@@ -51,7 +53,18 @@ class TestMaterials:
         simple_material = materials.Component(file_path)
         yield simple_material
         os.remove(file_path)
+        materials.ComponentList.components = []
+        materials.ComponentList.list_created = False
         return
+
+    @pytest.fixture
+    def component_list(self, simple_material):
+        simple_material
+        clist = materials.ComponentList()
+        yield clist
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            materials.ComponentList.list_created = False
 
     @pytest.fixture
     def temperature(self):
@@ -92,7 +105,8 @@ class TestMaterials:
         assert False
 
     @pytest.mark.xfail(reason="test not implemented")
-    def liquid_specific_enthalpy_change(self, simple_material, temperature):
+    def test_liquid_specific_enthalpy_change(self, simple_material,
+                                             temperature):
         assert False
 
     @pytest.mark.xfail(reason="test not implemented")
@@ -100,8 +114,21 @@ class TestMaterials:
         assert False
 
     @pytest.mark.xfail(reason="test not implemented")
-    def liquid_gas_enthalpy_change(self, simple_material, temperature):
+    def test_liquid_gas_enthalpy_change(self, simple_material, temperature):
         assert False
+
+    def test_create_component_list(self, component_list):
+        component_list
+
+    def test_change_component_list_mass(self, component_list):
+        addition = pint.Quantity("300 kg")
+        component_list["simple material"].mass += addition
+        assert component_list["simple material"].mass == addition
+
+    def test_change_component_list_moles(self, component_list):
+        addition = pint.Quantity("300 moles")
+        component_list["simple material"].moles += addition
+        assert component_list["simple material"].moles == addition
 
 
 class TestReactions:

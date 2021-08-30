@@ -32,13 +32,13 @@ seed = 0
 tolerance = 1e-6
 
 
-def get_seed():
+def get_seed() -> int:
     global seed
     set_seed((seed * 9228907) % 4294967296)
     return(seed)
 
 
-def set_seed(new_seed: int):
+def set_seed(new_seed: int) -> None:
     if new_seed is None:
         new_seed = randint(1, 1e6)
     elif type(new_seed) != int:
@@ -49,7 +49,7 @@ def set_seed(new_seed: int):
     seed = new_seed
 
 
-def get_prng():
+def get_prng() -> float:
     """ Pseudo Random Number Generator
 
     Returns a value in the range [-1, 1]
@@ -57,7 +57,7 @@ def get_prng():
     return(2 * get_seed() / 4294967296 - 1)
 
 
-def get_prng_pos():
+def get_prng_pos() -> float:
     """ Pseudo Random Number Generator
 
     Returns a value in the range [0, 1]
@@ -65,7 +65,7 @@ def get_prng_pos():
     return(get_seed() / 4294967296)
 
 
-def get_noise(stdv):
+def get_noise(stdv: float) -> float:
     """ Measurment Noise
 
     Generates measurement noise
@@ -77,7 +77,7 @@ def get_noise(stdv):
     return(noise)
 
 
-def dict_to_lowercase(dictionary: dict):
+def dict_to_lowercase(dictionary: dict) -> dict:
     """ Changes all keys of a dictionary to lowercase """
     for key, val in dictionary.items():
         if type(val) is dict:
@@ -90,7 +90,7 @@ def dict_to_lowercase(dictionary: dict):
     return(dictionary)
 
 
-def import_yaml(path):
+def import_yaml(path: str) -> dict:
     """
     Opens a yaml file given the path and returns a dictionary
     object containing the yaml properties.
@@ -101,7 +101,7 @@ def import_yaml(path):
     return(yaml_object)
 
 
-def import_yaml_folder(directory: str = '/'):
+def import_yaml_folder(directory: str = '/') -> dict:
     """
     Iterates through directory and looks for yaml files,
     if one is found, it is imported and stored in a dictionary
@@ -116,7 +116,7 @@ def import_yaml_folder(directory: str = '/'):
     return(yaml_objects)
 
 
-def check_property_exists(dict_to_check: dict, property_struct: list):
+def check_property_exists(dict_to_check: dict, property_struct: list) -> bool:
     """
     Uses the property_struct list to check that properties exist in
     dict_to_check.
@@ -155,7 +155,7 @@ def check_property_exists(dict_to_check: dict, property_struct: list):
     return(True)
 
 
-def get_dict_structure(dictionary: dict, root: bool = True):
+def get_dict_structure(dictionary: dict, root: bool = True) -> list:
     structure = []
     for key, val in dictionary.items():
         if type(val) is dict:
@@ -167,17 +167,23 @@ def get_dict_structure(dictionary: dict, root: bool = True):
     return(structure)
 
 
-def pint_check(value, expected_units):
+def pint_check(value, expected_units, no_errors: bool = False) -> bool:
     """ Error checking for a pint object
 
     expected_units is the dimensionality and should include the brackets, for
     example to check that a value passed is a velocity, you could pass
     '[length] / [time]' or '[velocity]'
+    If no_errors has been set as True, the function will return a False value
+    rather than raising an error.
     """
     if not isinstance(value, pint.Quantity):
+        if no_errors:
+            return(False)
         raise TypeError(f"Expected a pint Quantity object, "
                         f"got a {type(value)} instead")
     elif not value.check(expected_units):
+        if no_errors:
+            return(False)
         raise TypeError(f"Expected dimensionality of {expected_units}, got "
                         f"{value.dimensionality} instead")
     return(True)
