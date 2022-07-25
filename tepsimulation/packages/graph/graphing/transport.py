@@ -10,6 +10,7 @@ Compressor: UnitOperation
     Gas compressor
 """
 import warnings
+import pint
 
 from . import base
 
@@ -34,14 +35,14 @@ class Split(base.UnitOperation):
     -------
 
     """
-    inelet = None
-    primary_outlet = None
-    secondary_outlet = None
-    _position = 0
-    vrange = 0
 
     def __init__(self, id: str) -> None:
         super().__init__(id)
+        self.inelet = None
+        self.primary_outlet = None
+        self.secondary_outlet = None
+        self._position = 0
+        self.vrange = 0
         raise NotImplementedError
 
     def position() -> dict:
@@ -88,7 +89,17 @@ class Join(base.UnitOperation):
 
     def __init__(self, id: str) -> None:
         super().__init__(id)
-        raise NotImplementedError
+
+    def add_outlet(self, stream: base.Stream, outlet_id: str) -> None:
+        if len(self.outlets) > 0:
+            warnings.warn(f"Overriding outlet of {self.id}", RuntimeWarning)
+            for key in self.outlets.keys():
+                del self.outlets[key]
+        return super().add_outlet(stream, outlet_id=outlet_id)
+
+    def step_events(self, time_step: pint.Quantity) -> None:
+        
+        return
 
 
 class Compressor(base.UnitOperation):

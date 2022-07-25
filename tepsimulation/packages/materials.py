@@ -99,7 +99,7 @@ class Component:
         if not utils.compare_dict_struct(yaml_dict, component_properties):
             raise RuntimeError(f"File '{path}' missing properties, must "
                                f"have the following properties: "
-                               f"{component_structure}")
+                               f"{component_properties}")
         self._properties = yaml_dict
         self._set_properties()
         ComponentList.add_component(self)
@@ -415,7 +415,6 @@ class ComponentList:
 
 
 class Reaction:
-    # TODO add registry like components and standardize import functions
     def __init__(self, path: str) -> None:
         self.name = None
         self.components = None
@@ -431,7 +430,7 @@ class Reaction:
         if not utils.compare_dict_struct(yaml_dict, reaction_properties):
             raise RuntimeError(f"File '{path}' missing properties, must "
                                f"have the following properties: "
-                               f"{reaction_structure}")
+                               f"{reaction_properties}")
         self._properties = yaml_dict
         self._set_properties()
         ReactionList.add_reaction(self)
